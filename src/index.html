@@ -454,7 +454,9 @@ function candidateSelected(selection)
 					Parties[j].PartySelected = true;	
 					Parties[j].WhenSelected = new Date();	
 					
-					if (Contests[CurrentContest].NumberOfSelectedCandidates < Contests[CurrentContest].NumberOfCandidatesToSelect)
+					if (window.top.AllowOverVotes)
+						Contests[CurrentContest].NumberOfSelectedCandidates++;
+					else if (Contests[CurrentContest].NumberOfSelectedCandidates < Contests[CurrentContest].NumberOfCandidatesToSelect)
 						Contests[CurrentContest].NumberOfSelectedCandidates++;
 					else if (!window.top.AllowOverVotes)
 					{//need to flip other candidate
@@ -494,8 +496,8 @@ function candidateSelected(selection)
 			checkContest();	
 	}		
 	else
-	{//selecting a candidate
-	
+	{//selecting a candidate	
+
 		if (window.top.contentFrame.document.getElementById(theCheck).src == check.src)
 		{//uncheck of deselect the candidate
 			window.top.contentFrame.document.getElementById(theCheck).src = invisibleImage;
@@ -509,7 +511,9 @@ function candidateSelected(selection)
 			Candidates[CurrentCandidateIndex].CandidateSelected = true;	
 			Candidates[CurrentCandidateIndex].WhenSelected = new Date();
 				
-			if (Contests[CurrentContest].NumberOfSelectedCandidates < Contests[CurrentContest].NumberOfCandidatesToSelect)
+			if (window.top.AllowOverVotes)
+				Contests[CurrentContest].NumberOfSelectedCandidates++;
+			else if (Contests[CurrentContest].NumberOfSelectedCandidates < Contests[CurrentContest].NumberOfCandidatesToSelect)
 				Contests[CurrentContest].NumberOfSelectedCandidates++;
 			else if (!window.top.AllowOverVotes)
 			{//need to flip other candidate
@@ -659,17 +663,16 @@ function checkAllContests()
 }
 
 function checkContest()
-{	
+{
 	var checkImage1 = "check" + getContestCell(CurrentContest);
 	var elementID = "button" + getContestCell(CurrentContest);
-	if ((Contests[CurrentContest].NumberOfSelectedCandidates == Contests[CurrentContest].NumberOfCandidatesToSelect) && (Contests[CurrentContest].NumberOfCandidatesToSelect > 0))
+
+	if (((!window.top.AllowOverVotes) && (Contests[CurrentContest].NumberOfSelectedCandidates >= Contests[CurrentContest].NumberOfCandidatesToSelect)) || ((window.top.AllowOverVotes) && (Contests[CurrentContest].NumberOfSelectedCandidates >= Contests[CurrentContest].NumberOfCandidatesToSelect)))
 	{
 		window.top.contentFrame.document.getElementById(checkImage1).src = checkImage;
 	}
 	else
-	{
 		window.top.contentFrame.document.getElementById(checkImage1).src = invisibleImage;
-	}
 	
 	theHeading = window.top.contentFrame.document.getElementById(elementID).innerHTML;
 	changeHeading(theHeading);
