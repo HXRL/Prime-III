@@ -585,12 +585,10 @@ function printBallot()
 	else
 		window.top.contentFrame.location = "ballot.html";
 		
-	if (VoterIsVerifyingQRCode)
-		window.top.ballotFrame.location = "nothing.html";
+	if ((VoterIsVerifyingQRCode) || (PrintThe == "QRCode"))
+		window.top.ballotFrame.location = "empty.html";
 	else if (UseAudio) 
 		window.top.ballotFrame.printBallot();
-	else if (PrintThe == "QRCode")
-		window.top.ballotFrame.location = "empty.html";
 	else
 	{	
 		if (PrintThe == "Ballot" || PrintThe == "PDFText" ||PrintThe == "PDFTextImage")
