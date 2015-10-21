@@ -113,6 +113,9 @@ function setup()
 
 function startPrimeIII()
 {
+	if (NumberOfCandidateButtons <= 2) NumberOfCandidateButtons = 3;
+	if ((NumberOfCandidateButtonsColumns > 2) || (NumberOfCandidateButtonsColumns < 1)) NumberOfCandidateButtonsColumns = 2;
+	
 	if (NumberOfContests > 100000000)
 	{
 		var BaseDifference = Math.round(NumberOfContests/BaselineNumberOfContestsForDisplay);
@@ -1317,9 +1320,12 @@ function displayOffScreenSelection()
 					buttonText += "\">";
 				}
 	
-				window.top.contentFrame.document.getElementById(theButton).style.visibility = "visible";
-				window.top.contentFrame.document.getElementById(theButton).innerHTML = buttonText;
-				candidateButtonIndex++;
+				if (candidateButtonIndex < NumberOfCandidateButtons)
+				{
+					window.top.contentFrame.document.getElementById(theButton).style.visibility = "visible";
+					window.top.contentFrame.document.getElementById(theButton).innerHTML = buttonText;
+					candidateButtonIndex++;
+				}
 			}		
 		}
 	}
