@@ -27,6 +27,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 <script language="JavaScript" src="Ballot.js"> </script>
 <script language="JavaScript">
 
+var DisableAudio = false;
+
 if ((!window.top.isMobile.any()) && (!window.top.theBrowser.match(/firefox/i))) self.location = "firefox.html";
 else if ((window.top.isMobile.Windows()) && (!window.top.theBrowser.match(/firefox/i)) && (!window.top.theBrowser.match(/chrome/i))) 
 {
@@ -196,7 +198,7 @@ function processAccessCode(accessCode)
 		else 
 		{
 			alert("Invalid access code or barcode. Please try again.");
-			setTimeout("window.top.contentFrame.clearAccessCode()", 100);
+			window.top.location = "index.html";
 		}
 	}
 	else 
@@ -216,7 +218,7 @@ function processAccessCode(accessCode)
 		if (ballotItems[0] != BallotID)
 		{
 			alert("Invalid access code or barcode. Please try again.");
-			setTimeout("window.top.contentFrame.clearAccessCode()", 100);
+			window.top.location = "index.html";
 		}
 		else
 		{
@@ -457,11 +459,9 @@ function candidateSelected(selection)
 					Parties[j].PartySelected = true;	
 					Parties[j].WhenSelected = new Date();	
 					
-					if (window.top.AllowOverVotes)
+					if (Contests[CurrentContest].NumberOfSelectedCandidates < Contests[CurrentContest].NumberOfCandidatesToSelect)
 						Contests[CurrentContest].NumberOfSelectedCandidates++;
-					else if (Contests[CurrentContest].NumberOfSelectedCandidates < Contests[CurrentContest].NumberOfCandidatesToSelect)
-						Contests[CurrentContest].NumberOfSelectedCandidates++;
-					else if (!window.top.AllowOverVotes)
+					else 
 					{//need to flip other candidate
 						var mostRecentSelection = new Date();
 						var candidateToFlip = -1;
@@ -509,19 +509,18 @@ function candidateSelected(selection)
 		}
 		else 
 		{//select the candidate
-
 			window.top.contentFrame.document.getElementById(theCheck).src = checkImage;
 			Candidates[CurrentCandidateIndex].CandidateSelected = true;	
 			Candidates[CurrentCandidateIndex].WhenSelected = new Date();
 				
-			if (window.top.AllowOverVotes)
+			if ((window.top.AllowOverVotes) && (Contests[CurrentContest].ContestName == "Settings"))
+				flipCandidate();
+			else if (window.top.AllowOverVotes)
 				Contests[CurrentContest].NumberOfSelectedCandidates++;
 			else if (Contests[CurrentContest].NumberOfSelectedCandidates < Contests[CurrentContest].NumberOfCandidatesToSelect)
 				Contests[CurrentContest].NumberOfSelectedCandidates++;
 			else if (!window.top.AllowOverVotes)
-			{//need to flip other candidate
 				flipCandidate();
-			}
 		}			
 		checkContest();
 	}
@@ -681,7 +680,11 @@ function checkContest()
 
 function contestSelectedReview(WhoCalledMe)
 {
-	if (WhoCalledMe == WriteIn) WriteInCandidate = false;
+	if (WhoCalledMe == WriteIn) 
+	{
+		DisableAudio = true;
+		WriteInCandidate = false;
+	}
 
 	window.top.contentFrame.location = "prime.html";
 
@@ -693,16 +696,29 @@ function contestSelectedReview(WhoCalledMe)
 
 	setTimeout("contestSelected(CurrentContest)", 500);
 
-	if ((WhoCalledMe == WriteIn) && (NumberOfCandidatesInTheCurrentContest > NumberOfCandidateButtons)) 
+	if (WhoCalledMe == WriteIn)  
 		setTimeout("writeInScroll()", 1000);
 }
 
 function writeInScroll()
 {
-	if (Candidates[window.top.CurrentCandidateIndex].ButtonIndex < 0) 
+	if (Candidates[CurrentCandidateIndex].ButtonIndex < 0) 
 	{
 		scrollDown();
 		writeInScroll();
+	}
+	else
+	{
+		window.top.ballotFrame.stopSpeaking();
+		window.top.ballotFrame.setSpeechIndex(CurrentCandidateIndex);
+		
+		if (Candidates[CurrentCandidateIndex].CandidateSelected)
+		{
+			window.top.ballotFrame.saySelected();
+			window.top.ballotFrame.incrementSpeechIndex();	
+		}			
+		DisableAudio = false;
+		setTimeout("window.top.ballotFrame.speakText()", 500);
 	}
 		
 }
@@ -1130,7 +1146,9 @@ function contestSelected(buttonID)
 			window.top.ballotFrame.setItemsToSpeak("Candidates");
 			
 		window.top.ballotFrame.resetSpeechIndexForCandidates();
-		window.top.ballotFrame.speakText();
+		
+		if (!DisableAudio) 
+			window.top.ballotFrame.speakText();
 	}
 	
 	checkAllContests();
@@ -1406,11 +1424,9 @@ function scrollDown()
 				window.top.contentFrame.document.getElementById(theButton).innerHTML = buttonText;
 				candidateButtonIndex++;
 			}
-			
 		}
 	}
-		
-	
+			
 	while (candidateButtonIndex < NumberOfCandidateButtons)
 	{
 		theButton = "candidateButton" + candidateButtonIndex;

@@ -154,6 +154,7 @@ var VotingInstructions = "<font id=\"PropositionOrAmendmentText\" size=\"8\"><im
 var WriteIn = "Candidate Write In";
 var WriteInID = "888";
 var WriteInBoxIsReadOnly = true;
+var AccessCodeBoxIsReadOnly = false;
 var PropositionOrAmendment = "Proposition or Amendment";
 var VoteByParty = "Vote By Party";
 var Settings = "Settings";

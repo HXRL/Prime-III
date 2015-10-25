@@ -197,14 +197,14 @@ function scrollUp(selection)
 {	
 	var startingFrom = 0;
 	
-	if (selection >= window.top.NumberOfContestButtonsOnReview)
+	for (j=0;j<window.top.NumberOfContests;j++)
 	{
-		for (j=0;j<window.top.NumberOfContests;j++)
-		{
-			if (window.top.Contests[j].ButtonIndex == selection) startingFrom = j - window.top.NumberOfContestButtonsOnReview;
-			window.top.Contests[j].ButtonIndex = -1;
-		}
+		if (window.top.Contests[j].ButtonIndex == selection) startingFrom = j-window.top.NumberOfContestButtonsOnReview;
+		window.top.Contests[j].ButtonIndex = -1;
 	}
+
+	if (startingFrom < window.top.NumberOfContestButtonsOnReview) startingFrom = 0;
+
 	loadContests(startingFrom);
 }
 </script>

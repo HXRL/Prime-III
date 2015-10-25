@@ -188,7 +188,14 @@ document.write("</tr></table>");
 </td></tr>
 
 <tr><td>
-<input style="font: bold 18px Arial;width:1506;height:50" type="password" maxlength="9000" size="100" name="AccessCodeText" />
+<script language="JavaScript">
+document.write("<input ");
+
+if (window.top.AccessCodeBoxIsReadOnly)
+	document.write("readonly ");
+
+document.write("style=\"font: bold 18px Arial;width:1506;height:50\" type=\"password\" maxlength=\"9000\" size=\"100\" name=\"AccessCodeText\" />");
+</script>
 </table>
 </center>
 </form>
