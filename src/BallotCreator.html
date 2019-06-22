@@ -22,6 +22,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 <html>
 <head>
 <title>Prime III Ballot Creator</title>
+<script language="JavaScript" src="Phrases.js"> </script>
+<script language="JavaScript" src="Settings.js"> </script>
 <script type="text/javascript" src="cookie.js"></script>
 <script language="JavaScript">
 var OneYear = 31556926;
@@ -33,7 +35,12 @@ var NumberOfPropsAndAmends = 0;
 var NumberOfParties = 0;
 var BallotName = "";
 var BallotID = "";
-var PropOrAmendOptionsArray = new Array("Yes/No", "Accept/Reject", "Agree/Disagree");
+var YesNo = "Yes/No";
+var AcceptReject = "Accept/Reject";
+//var YesNo = Phrase[window.top.SelectedVoice][0] + "/" + Phrase[window.top.SelectedVoice][1];
+//var AcceptReject = Phrase[window.top.SelectedVoice][28] + "/" + Phrase[window.top.SelectedVoice][29];
+//var PropOrAmendOptionsArray = new Array("Yes/No", "Accept/Reject", "Agree/Disagree");
+var PropOrAmendOptionsArray = new Array(YesNo, AcceptReject);
 
 var SelectionColor = "#FFFFDF";
 

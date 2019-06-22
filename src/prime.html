@@ -21,26 +21,51 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 <html style="width: 100%; height: 100%;">
 <head>
+<link rel="stylesheet" type = "text/css" href="zoom.css">
+<link rel="stylesheet" type = "text/css" href="borders.css">
+
+<script language="JavaScript" src="zoom.js"> </script>
+
 <script language="JavaScript">
 function startPrimeIII()
 {
 	self.document.bgColor = window.top.SelectionColor;
+
 	window.top.startPrimeIII();
 	
 	if (!window.top.VotingStarted)
 	{
+		window.top.document.title = window.top.BallotName;
+
 		self.document.getElementById("previous").style.visibility = "hidden";
 		self.document.getElementById("clear").style.visibility = "hidden";
 		self.document.getElementById("top").style.visibility = "hidden";
 		self.document.getElementById("review").style.visibility = "hidden";
+		
+		if (window.top.EnableScreenReading)
+			self.document.getElementById("PrimeFrameBody").style.visibility = "hidden";
 	}
+	else if (window.top.UserInterface == "TIPI")
+		self.document.getElementById("next").innerHTML = "<img alt=\"" + window.top.Phrase[window.top.SelectedVoice][149] + "\" src=\"invisible.gif\" style=\"vertical-align:middle\" height=\"0\" width=\"0\"/>" + window.top.Phrase[window.top.SelectedVoice][149] + " <img alt=\"" + window.top.Phrase[window.top.SelectedVoice][149] + "\" src=\"continuearrow.png\" style=\"vertical-align:middle\"/>";
 	else
-		self.document.getElementById("next").innerHTML = "Continue <img src=\"continuearrow.png\" style=\"vertical-align:middle\" />";
+		self.document.getElementById("next").innerHTML = "<img alt=\"" + window.top.Phrase[window.top.SelectedVoice][65] + "\" src=\"invisible.gif\" style=\"vertical-align:middle\" height=\"0\" width=\"0\"/>" + window.top.Phrase[window.top.SelectedVoice][25] + " <img alt=\"" + window.top.Phrase[window.top.SelectedVoice][25] + "\" src=\"continuearrow.png\" style=\"vertical-align:middle\"/>";
+
+
+	if (window.top.EnableScreenReading)
+		setTimeout("document.getElementById(\"myHeading\").focus()", 200);
+	else if (!window.top.VotingStarted)
+		setTimeout("self.document.forms[0].next.focus()", 500);
 	
-	setTimeout("self.document.forms[0].next.focus()", 900);
-	
-	if (window.top.UserInterface == "Basic")
+	if ((window.top.UserInterface == "Basic") || (window.top.UserInterface == "TIPI"))
 	{
+		if (window.top.UserInterface == "TIPI")
+		{
+			self.document.getElementById("previous").style.visibility = "hidden";
+			self.document.getElementById("clear").style.visibility = "hidden";
+			self.document.getElementById("top").style.visibility = "hidden";
+			self.document.getElementById("review").style.visibility = "hidden";
+		}
+		
 		var tbl = document.getElementById("p3Table");
 		for (var i = 0; i < tbl.rows.length; i++) 
 		{
@@ -55,7 +80,26 @@ function startPrimeIII()
 
 function menuNavigate()
 {
+	if (window.top.EnableScreenReading) 
+		self.document.getElementById("goto").innerHTML = window.top.Phrase[window.top.SelectedVoice][118] + " " + self.document.getElementById("p3menu").options[self.document.getElementById("p3menu").selectedIndex].text;
+	else changeContest();
+}
+
+function changeContest()
+{
 	window.top.contestSelected(self.document.getElementById("p3menu").selectedIndex);
+	
+	if (window.top.EnableScreenReading)
+	{
+		self.document.getElementById("PrimeFrameBody").style.visibility = "visible";
+		setTimeout("document.getElementById(\"myHeading\").focus();", 200);	
+	}
+}
+
+function TIPIdemo()
+{
+	if (window.top.UserInterface == "TIPI") 
+		window.top.contentFrame.document.getElementById("p3menu").style.visibility = "hidden";
 }
 
 </script>
@@ -64,7 +108,7 @@ function menuNavigate()
 <body id="myDocument" onLoad="JavaScript:startPrimeIII();" style="width: 100%; height: 100%; margin:0px auto">
 <form id="myForm">
 
-<table id="p3Table" style="height:100%;width:100%;" cellpadding="0" cellspacing="0" border="0">
+<table id="p3Table" role="presentation" style="height:100%;width:100%;" cellpadding="0" cellspacing="0" border="0">
 <tr>
 <script language="JavaScript">
 
@@ -72,11 +116,11 @@ document.write("<td valign=\"top\" align=\"left\" width=\"25%\" bgcolor=\"");
 document.write(window.top.DefaultColor);
 document.write("\">\n");
 
-document.write("<table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" bgcolor=\"");
+document.write("<table role=\"presentation\" width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" bgcolor=\"");
 document.write(window.top.DefaultColor);
 document.write("\">\n");
 
-if (window.top.NumberOfContests > window.top.VeryLargeNumberOfContests) window.top.DivOrP = "div";
+if (window.top.Contests.length > window.top.VeryLargeNumberOfContests) window.top.DivOrP = "div";
 
 window.top.DivOrP = "div";
 
@@ -101,7 +145,7 @@ for (i=0;i<window.top.BaselineNumberOfContestsForDisplay;i++)
 	document.write(window.top.invisibleImage);
 	document.write("\">");
 	
-	if ((i == (window.top.BaselineNumberOfContestsForDisplay-1)) && (window.top.BaselineNumberOfContestsForDisplay < window.top.NumberOfContests))
+	if ((i == (window.top.BaselineNumberOfContestsForDisplay-1)) && (window.top.BaselineNumberOfContestsForDisplay < window.top.Contests.length))
 		document.write("<br><br>*** MORE ***");
 	
 	document.write("</");
@@ -122,37 +166,69 @@ document.write("<td valign=\"top\" align=\"center\" bgcolor=\"");
 document.write(window.top.SelectionColor);
 document.write("\">\n");
 
-document.write("<p id='headingParagraph'><font id='myHeading' size=\"10\">");
+document.write("<h1 id='myHeading'");
+if (window.top.EnableScreenReading)
+	document.write(" tabindex=\"-1\"");
+document.write("><font id='myHeadingFont' size=\"10\">");
+
 document.write(window.top.BallotName);
-document.write("</font></p>");
+document.write("</font></h1>");
 
-document.write("<p id='headingParagraph2'><font id='smallHeading' size=\"5\"> </font></p>");
-document.write("<p id='headingParagraph2'><font id='navigationHeading' size=\"5\"> </font></p>");
+document.write("<h2 id='headingParagraph2'><font id='smallHeading' size=\"5\">");
 
-document.write("<table border=\"0\" cellspacing=\"0\" cellpadding=\"10\" bgcolor=\"");
+if ((window.top.UserInterface == "Basic") || (window.top.UserInterface == "TIPI"))
+{
+	document.write(window.top.Phrase[window.top.SelectedVoice][55]);
+	if (window.top.UserInterface == "TIPI")
+		document.write(window.top.Phrase[window.top.SelectedVoice][148] + "</font>");
+	else if (window.top.EnableScreenReading)
+		document.write(window.top.Phrase[window.top.SelectedVoice][56] + "</font>");
+	else
+		document.write(window.top.Phrase[window.top.SelectedVoice][57] + "</font>");
+}
+document.write("</h2>");
+
+
+document.write("<h3 id='headingParagraph3'><font id='navigationHeading' size=\"5\"> </font></h3>");
+
+document.write("<table role=\"presentation\" border=\"0\" cellspacing=\"0\" cellpadding=\"10\" bgcolor=\"");
 document.write(window.top.SelectionColor);
 document.write("\"><tr><td>");
 
-document.write("<p id='PropositionOrAmendmentText' align='left'>");
-if (window.top.UserInterface == "Basic")
-	document.write("<font id=\"PropositionOrAmendmentText\" size=\"8\">To start voting, touch the start button below or select a contest from the menu.</font>");
-else
-	document.write(window.top.VotingInstructions);
-	
-document.write("</p>");
+document.write("<h4 id='PropositionOrAmendmentText' align='left'>");
+if (window.top.UserInterface == "LEVI") document.write(window.top.VotingInstructions);
+document.write("</h4>");
 
-if (window.top.UserInterface == "Basic")
-{
+if ((window.top.UserInterface == "Basic") || (window.top.UserInterface == "TIPI"))
+{	
+	if (window.top.EnableScreenReading)
+		document.write("<label for=\"p3menu\">" + window.top.Phrase[window.top.SelectedVoice][117] + "</label> ");
+	
 	document.write("<center><select id=\"p3menu\" onchange=\"menuNavigate()\" style=\"font: 20px Arial;\">\n");
-	for (i=0;i<window.top.BaselineNumberOfContestsForDisplay;i++)
+
+	for (i=0;i<window.top.Contests.length;i++)
 	{
 		document.write("<option style=\"font: 24px Arial;\" value=\"");
 		document.write(i);
 		document.write("\">");
-		document.write(window.top.Contests[i].ContestName);
+		
+		if (window.top.Contests[i].ContestType == window.top.Settings)
+			document.write(window.top.Phrase[window.top.SelectedVoice][8]);
+		else if (window.top.Contests[i].ContestType == window.top.VoteByParty)
+			document.write(window.top.Phrase[window.top.SelectedVoice][11]);
+		else
+			document.write(window.top.Contests[i].ContestName);
 		document.write("</option>\n");
 	}
-	document.write("</select></center>\n");	
+	
+	document.write("</select> ");
+	
+	if (window.top.EnableScreenReading)
+		document.write("<button id=\"goto\" type=\"button\" style=\"" + window.top.ScreenReaderSelectionButtonFontAndSize + "\" onClick=\"changeContest()\">" + window.top.Phrase[window.top.SelectedVoice][118] + " " + self.document.getElementById("p3menu").options[self.document.getElementById("p3menu").selectedIndex].text + "</button> ");
+
+	document.write("</center>\n");	
+	
+	if (window.top.UserInterface == "TIPI") setTimeout("TIPIdemo()", 200);
 }
 
 document.write("</td></tr></table>");
@@ -160,7 +236,7 @@ document.write("</td></tr></table>");
 
 document.write("<p id='PrimeFrameBody' align='left'>");
 
-document.write("<table border=\"0\" cellspacing=\"7\" cellpadding=\"0\" bgcolor=\"");
+document.write("<table role=\"presentation\" border=\"0\" cellspacing=\"7\" cellpadding=\"0\" bgcolor=\"");
 document.write(window.top.SelectionColor);
 document.write("\">\n");
 
@@ -207,21 +283,46 @@ document.write("</table></p>");
 
 
 <br>
-<button style="font: bold 18px Arial;width:200;height:90" type="button" id="previous" onClick="window.top.navigate('previous')"><img src="backarrow.png" style="vertical-align:middle" /> Back</button>
+<script language="JavaScript">
+document.write("<button alt=\"" + window.top.Phrase[window.top.SelectedVoice][59] + "\" style=\"" + window.top.NavigationButtonFontAndSize + "\" type=\"button\" id=\"previous\" onClick=\"window.top.navigate('previous')\"><img alt=\"" + window.top.Phrase[window.top.SelectedVoice][59] + "\" src=\"backarrow.png\" style=\"vertical-align:middle\" /> " + window.top.Phrase[window.top.SelectedVoice][21] + "</button>");
 
-<button style="font: bold 18px Arial;width:200;height:90" type="button" id="top" onClick="window.top.navigate('top')">Top</button>
+document.write("<button alt=\"" + window.top.Phrase[window.top.SelectedVoice][60] + "\" style=\"" + window.top.NavigationButtonFontAndSize + "\" type=\"button\" id=\"top\" onClick=\"window.top.navigate('top')\"><img alt=\"" + window.top.Phrase[window.top.SelectedVoice][60] + "\" src=\"invisible.gif\" style=\"vertical-align:middle\" height=\"0\" width=\"0\" />" + window.top.Phrase[window.top.SelectedVoice][22] + "</button>");
 
-<button style="font: bold 18px Arial;width:200;height:90" type="button" id="clear" onClick="window.top.clearAll()">Clear</button>
+document.write("<button alt=\"" + window.top.Phrase[window.top.SelectedVoice][61] + "\" style=\"" + window.top.NavigationButtonFontAndSize + "\" type=\"button\" id=\"clear\" onClick=\"window.top.clearAll()\"><img alt=\"" + window.top.Phrase[window.top.SelectedVoice][61] + "\" src=\"invisible.gif\" style=\"vertical-align:middle\" height=\"0\" width=\"0\" />" + window.top.Phrase[window.top.SelectedVoice][23] + "</button>");
 
-<button style="font: bold 18px Arial;width:200;height:90" type="button" id="review" onClick="window.top.navigate('review')">Review</button>
+document.write("<button alt=\"" + window.top.Phrase[window.top.SelectedVoice][62] + "\" style=\"" + window.top.NavigationButtonFontAndSize + "\" type=\"button\" id=\"review\" onClick=\"window.top.navigate('review')\"><img alt=\"" + window.top.Phrase[window.top.SelectedVoice][62] + "\" src=\"invisible.gif\" style=\"vertical-align:middle\" height=\"0\" width=\"0\" />" + window.top.Phrase[window.top.SelectedVoice][24] + "</button>");
 
-<button style="font: bold 18px Arial;width:200;height:90" type="button" id="next" onClick="window.top.navigate('next')">Start Voting <img src="continuearrow.png" style="vertical-align:middle" /></button>
-
+if (window.top.UserInterface == "TIPI")
+{
+	if (window.top.VotingStarted)
+		document.write("<button style=\"" + window.top.TIPINextButtonFont + "\" type=\"button\" id=\"next\" onClick=\"window.top.navigate('next')\">" + window.top.Phrase[window.top.SelectedVoice][149] + " <img src=\"continuearrow.png\" style=\"vertical-align:middle\" /></button>");	
+	else
+		document.write("<button style=\"" + window.top.TIPINextButtonFont + "\" type=\"button\" id=\"next\" onClick=\"window.top.navigate('next')\">" + window.top.Phrase[window.top.SelectedVoice][10] + " <img src=\"continuearrow.png\" style=\"vertical-align:middle\" /></button>");
+}
+else 
+	document.write("<button style=\"" + window.top.NavigationButtonFontAndSize + "\" type=\"button\" id=\"next\" onClick=\"window.top.navigate('next')\">" + window.top.Phrase[window.top.SelectedVoice][10] + " <img src=\"continuearrow.png\" style=\"vertical-align:middle\" /></button>");
+</script>
 </tr>
 </table>
 
 </form>
 
+
+<div id = 'zoomButtons'>
+</br>
+<input type="image" id="outZoom" src="ZoomOut.png" onclick="zoomOut()" > </br> </br>
+<input type="image" id="inZoom" src="ZoomIn.png" onclick="zoomIn()" >
+
+<script language="JavaScript">
+	if (!window.top.UseZoom)
+	{
+		var div = document.getElementById( "zoomButtons" );
+		div.style.display = "none";
+	}
+</script>
+
+</br>
+</div>
 <script language="JavaScript" src="TabAndEnter.js"> </script>
 </body>
 </html>

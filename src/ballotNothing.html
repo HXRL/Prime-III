@@ -36,7 +36,7 @@ function printBallot()
 	if (!window.top.VoterIsVerifyingQRCode)
 	{//If the voter is verifying the QR Code, then it will show the ballot
 		window.print();
-		setTimeout("window.top.location=\"index.html\"", 9000);
+		setTimeout("window.top.location=window.top.location", 9000);
 	}
 }
 </script>
@@ -53,7 +53,7 @@ if (window.top.PrintThe == "Ballot")
 	var lineNumber = 1;
 	var i=0;
 	
-	for (i=0;i<window.top.NumberOfContests;i++)
+	for (i=0;i<window.top.Contests.length;i++)
 	{
 		var buttonText = lineNumber + ". " + window.top.Contests[i].ContestName;
 		var foundCandidate = 0;
@@ -61,7 +61,7 @@ if (window.top.PrintThe == "Ballot")
 	
 		if ((window.top.Contests[i].ContestType != window.top.BallotReview) && (window.top.Contests[i].ContestType != window.top.VoteByParty) && (window.top.Contests[i].ContestType != window.top.Settings))
 		{
-			for (j=0;j<window.top.NumberOfCandidates;j++)
+			for (j=0;j<window.top.Candidates.length;j++)
 			{
 				if ((window.top.Candidates[j].Contest.ContestID == window.top.Contests[i].ContestID) && (window.top.Candidates[j].CandidateSelected) && (!window.top.Candidates[j].WriteInCandidate))
 				{
@@ -113,7 +113,7 @@ else if (window.top.PrintThe == "QRCode")
 {//print QR Code
 	var ballotCode = window.top.BallotID;
 	
-	for (i=0;i<window.top.NumberOfContests;i++)
+	for (i=0;i<window.top.Contests.length;i++)
 	{
 		var foundCandidate = 0;
 	
@@ -121,7 +121,7 @@ else if (window.top.PrintThe == "QRCode")
 		{
 			if (FirstContest == 0) FirstContest = i;
 			
-			for (j=0;j<window.top.NumberOfCandidates;j++)
+			for (j=0;j<window.top.Candidates.length;j++)
 			{
 				if ((window.top.Candidates[j].Contest.ContestID == window.top.Contests[i].ContestID) && (window.top.Candidates[j].CandidateSelected))
 				{

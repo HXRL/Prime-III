@@ -1,0 +1,184 @@
+<!-- 
+Prime III
+
+URL: http://www.PrimeVotingSystem.org
+
+Copyright (c) 2015 University of Florida
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+ -->
+
+<html style="width: 100%; height: 100%;">
+<head>
+<script language="JavaScript" src="Phrases.js"> </script>
+<script language="JavaScript" src="Settings.js"> </script>
+
+<script language="JavaScript">
+function go()
+{
+	//window.top.CurrentContest++;
+	window.top.contestSelectedReview('TPIdemo');
+}
+</script>
+</head>
+
+<body style="width: 100%; height: 100%; margin:0px auto; overflow-y:hidden">
+<script language="JavaScript">
+
+	document.write("<center><b><font size=\"10\">");
+	document.write(window.top.BallotName);
+	document.write("</font></b>\n<br><br></center><font size=\"6\">");	
+
+	var lineNumber = 1;
+	var i=0;
+	
+	for (i=0;i<window.top.CurrentContest;i++)
+	{
+		var ballotText = "&nbsp&nbsp&nbsp&nbsp&nbsp" +lineNumber + ". " + window.top.Contests[i].ContestName;
+		
+		var foundCandidate = 0;
+		var FoundWriteInCandidate = false;
+		var CandidateID = window.top.NoSelectionID; //"999";
+		var NoCandidateID = window.top.NoSelectionID; //"999";
+	
+		if ((window.top.Contests[i].ContestType != window.top.BallotReview) && (window.top.Contests[i].ContestType != window.top.VoteByParty) && (window.top.Contests[i].ContestType != window.top.Settings))
+		{
+			for (j=0;j<window.top.Candidates.length;j++)
+			{
+				if ((window.top.Candidates[j].Contest.ContestID == window.top.Contests[i].ContestID) && (window.top.Candidates[j].CandidateSelected) && (!window.top.Candidates[j].WriteInCandidate))
+				{
+					if (foundCandidate > 0)
+					{
+						ballotText += "<br>\n " + "&nbsp&nbsp&nbsp&nbsp&nbsp" +  lineNumber + ". " + window.top.Contests[i].ContestName;
+					}
+					ballotText += " ==> <b>";
+					
+					foundCandidate++;
+					
+					ballotText += window.top.Candidates[j].CandidateName;
+					
+					if (window.top.PrintCandidatePartyLabel)
+						ballotText += " " + window.top.Candidates[j].Party.PartyLabel;
+
+					CandidateID = window.top.Candidates[j].CandidateID;
+					
+					if (window.top.PrintCandidateID)
+					{
+						ballotText += " " + CandidateID + " ";
+					}
+					else
+					{
+						ballotText += " ";
+					}
+					
+					ballotText += "</b>";
+
+					if (window.top.Candidates[j].CandidatePhoto != "none")
+						ballotText += " <img src=\"" + window.top.Candidates[j].CandidatePhoto + "\" style=\"vertical-align:middle\" />";
+											
+					if (window.top.PrintCheckbox)
+						ballotText += "<img src=\"checkbox.png\" style=\"vertical-align:middle\" /> ";
+				}
+				else if ((window.top.Candidates[j].Contest.ContestID == window.top.Contests[i].ContestID) && (window.top.Candidates[j].CandidateSelected) && (window.top.Candidates[j].WriteInCandidate))
+				{
+					if (foundCandidate > 0)
+					{
+						ballotText += "<br>\n " + "&nbsp&nbsp&nbsp&nbsp&nbsp" + lineNumber + ". " + window.top.Contests[i].ContestName + " (write-in) ==> <b>";
+					}
+					else 
+					{
+						ballotText += " (write-in) ==> <b>";
+					}
+					
+					FoundWriteInCandidate = true;
+					foundCandidate++;
+					
+					ballotText += window.top.Candidates[j].CandidateName;
+					if (window.top.PrintCandidatePartyLabel)
+						ballotText += " " + window.top.Candidates[j].Party.PartyLabel;
+					CandidateID = window.top.Candidates[j].CandidateID;
+					
+					if (window.top.PrintCandidateID)
+					{
+						ballotText += " " + CandidateID + " ";
+					}
+					else
+					{
+						ballotText += " ";
+					}
+					ballotText += "</b>";
+	
+					if (window.top.Candidates[j].CandidatePhoto != "none")
+						ballotText += " <img src=\"" + window.top.Candidates[j].CandidatePhoto + "\" style=\"vertical-align:middle\" />";						
+											
+					if (window.top.PrintCheckbox)
+						ballotText += "<img src=\"checkbox.png\" style=\"vertical-align:middle\" /> ";
+				}
+			}
+				
+			if (foundCandidate == 0) 
+			{
+				ballotText += " ==> <b>";
+				ballotText += window.top.NoSelection;
+				ballotText += "</b> ";
+				if (window.top.PrintCandidateID) ballotText += CandidateID;
+														
+				if (window.top.PrintCheckbox)
+					ballotText += "<img src=\"checkbox.png\" style=\"vertical-align:middle\" /> ";
+				
+				foundCandidate++;
+			}
+			
+			while (foundCandidate < window.top.Contests[i].NumberOfCandidatesToSelect)
+			{
+				ballotText += "<br>\n" + "&nbsp&nbsp&nbsp&nbsp&nbsp" + lineNumber + ". " + window.top.Contests[i].ContestName + " ==> <b>";
+				ballotText += window.top.NoSelection;
+				if (window.top.PrintCandidateID) ballotText += " " + NoCandidateID;
+				ballotText += "</b>";
+											
+				if (window.top.PrintCheckbox)
+					ballotText += "<img src=\"checkbox.png\" style=\"vertical-align:middle\" /> ";
+				
+				foundCandidate++;
+			}
+			
+			
+			document.write(ballotText);
+			document.write("<br><br>\n");
+			lineNumber++;		
+		}	
+	}
+	document.write("</font>");	
+	setTimeout("go()", 5000);
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,47 @@
+button:focus{
+	border-style: solid;
+	border-width: 5px;
+	border-color: red;
+}
+
+textarea:focus{
+	border-style: solid;
+	border-width: 5px;
+	border-color: red;
+}
+
+h1:focus{
+	border-style: solid;
+	border-width: 5px;
+	border-color: red;
+}
+
+h2:focus{
+	border-style: solid;
+	border-width: 5px;
+	border-color: red;
+}
+
+h3:focus{
+	border-style: solid;
+	border-width: 5px;
+	border-color: red;
+}
+
+h4:focus{
+	border-style: solid;
+	border-width: 5px;
+	border-color: red;
+}
+
+input:focus{
+	border-style: solid;
+	border-width: 5px;
+	border-color: red;
+}
+
+select:focus{
+	border-style: solid;
+	border-width: 5px;
+	border-color: red;
+}

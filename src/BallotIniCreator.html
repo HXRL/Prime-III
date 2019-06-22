@@ -22,6 +22,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 <html>
 <head>
 <title>Prime III</title>
+<script language="JavaScript" src="Phrases.js"> </script>
 <script language="JavaScript" src="Settings.js"> </script>
 <script language="JavaScript" src="Ballot.js"> </script>
 </head>
@@ -40,7 +41,9 @@ for (i=0;i<NumberOfContests;i++)
 }
 
 document.write("NumberOfContests=" + NumberOfContestsAndPropositionOrAmendments + "\n");
-document.write("ImagesDirectory=/home/gilbert/\n\n");
+document.write("ImagesDirectory=/home/gilbert/\n");
+document.write("BallotFilesDirectory==/home/gilbert/OmniTextFiles\n");
+document.write("BallotOutputDirectory==/home/gilbert/TallyResults\n\n");
 
 for (i=0;i<NumberOfContests;i++)
 {

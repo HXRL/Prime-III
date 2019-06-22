@@ -21,6 +21,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 <html style="width: 100%; height: 100%;">
 <head>
+<link rel="stylesheet" type = "text/css" href="zoom.css">
+<script language="JavaScript" src="zoom.js"> </script>
+
 <script language="JavaScript">
 var FirstContest = 0;
 
@@ -30,9 +33,45 @@ function contestSelected(selection)
 	{//voter touched the selection
 		theButton = "contestButton" + selection;
 		
-		if (document.getElementById(theButton).innerHTML == window.top.SubmitBallot)
+		if (selection == window.top.SubmitButtonInReviewValue)
 		{
 			window.top.printBallot();
+		}
+		else if (selection == window.top.RejectButtonInReviewValue)
+		{
+			if (window.top.ConfirmBallotRejection)
+			{
+				if (window.top.UseAudio)
+				{
+					window.top.ballotFrame.stopSpeaking();
+					window.top.ballotFrame.setItemsToSpeak("Ballot Rejection");
+					window.top.ballotFrame.setSpeechIndex(window.top.RejectButtonInReviewValue);
+					window.top.ballotFrame.speakText();
+				}
+				self.location = "rejectConfirmation.html";
+			}
+			else
+				window.top.location = window.top.location;
+		}
+		else if (document.getElementById(theButton).innerHTML == window.top.SubmitBallot)
+		{
+			window.top.printBallot();
+		}
+		else if (document.getElementById(theButton).innerHTML == window.top.RejectBallot)
+		{
+			if (window.top.ConfirmBallotRejection)
+			{
+				if (window.top.UseAudio)
+				{
+					window.top.ballotFrame.stopSpeaking();
+					window.top.ballotFrame.setItemsToSpeak("Ballot Rejection");
+					window.top.ballotFrame.setSpeechIndex(window.top.RejectButtonInReviewValue);
+					window.top.ballotFrame.speakText();
+				}
+				self.location = "rejectConfirmation.html";
+			}
+			else
+				window.top.location = window.top.location;
 		}
 		else if ((document.getElementById(theButton).innerHTML == window.top.MoreContests) || (document.getElementById(theButton).innerHTML == window.top.MoreContestsUp))
 		{
@@ -41,9 +80,11 @@ function contestSelected(selection)
 			else
 				scrollUp(selection+1);
 		}
+		else if (window.top.ReviewMode == "ReadOnly")
+			return;
 		else
 		{
-			for (i=0;i<window.top.NumberOfContests;i++)
+			for (i=0;i<window.top.Contests.length;i++)
 			{
 				if (window.top.Contests[i].ButtonIndex == selection)
 				{
@@ -60,6 +101,12 @@ function contestSelected(selection)
 		{
 			window.top.printBallot();
 		}
+		else if (selection == window.top.RejectBallot)
+		{
+			window.top.location = window.top.location;
+		}
+		else if (window.top.ReviewMode == "ReadOnly")
+			return;
 		else
 		{
 			window.top.contestSelectedReview('Review');
@@ -69,6 +116,19 @@ function contestSelected(selection)
 
 function loadContests(startingFrom)
 {
+	if (window.top.ReviewMode == "ByPass")
+		window.top.printBallot();
+	else if ((window.top.EnableScreenReading) && (!window.top.VotingStarted))
+		self.location = "thanks.html";
+	else if ((window.top.EnableScreenReading) || (window.top.isMobile.any())) 
+		startingFrom = 0;
+		
+	var link = document.createElement('link')
+	link.setAttribute('rel', 'stylesheet')
+	link.setAttribute('type', 'text/css')
+	link.setAttribute('href', 'borders.css')
+	document.getElementsByTagName('head')[0].appendChild(link)
+		
 	if (window.top.VoterIsVerifyingQRCode)
 	{//If this is someone verifying their QR Code, simply show the Ballot
 		window.top.printBallot();
@@ -95,17 +155,17 @@ function loadContests(startingFrom)
 		contestButtonIndex++;
 	}
 
-	while ((i<window.top.NumberOfContests) && (contestButtonIndex<window.top.NumberOfContestButtonsOnReview))
+	while ((i<window.top.Contests.length) && (contestButtonIndex<window.top.NumberOfContestButtonsOnReview))
 	{
 		theButton = "contestButton" + contestButtonIndex;
-		var buttonText = window.top.Contests[i].ContestName + " ==> ";
+		var buttonText = window.top.Contests[i].ContestName + " ";
 		var foundCandidate = 0;
 
 		if ((window.top.Contests[i].ContestType != window.top.BallotReview) && (window.top.Contests[i].ContestType != window.top.VoteByParty) && (window.top.Contests[i].ContestType != window.top.Settings))
 		{
 			if (FirstContest == 0) FirstContest = i;
 			
-			for (j=0;j<window.top.NumberOfCandidates;j++)
+			for (j=0;j<window.top.Candidates.length;j++)
 			{
 				if ((window.top.Candidates[j].Contest.ContestID == window.top.Contests[i].ContestID) && (window.top.Candidates[j].CandidateSelected))
 				{
@@ -121,21 +181,35 @@ function loadContests(startingFrom)
 					foundCandidate++;
 					
 					if (window.top.Candidates[j].CandidatePhoto == "none")
-						buttonText += window.top.Candidates[j].CandidateName + " " + window.top.Candidates[j].Party.PartyLabel;
+					{
+						if ((window.top.EnableScreenReading) && (window.top.Candidates[j].Party.PartyName != ""))
+							buttonText += window.top.Candidates[j].CandidateName + " " + window.top.Candidates[j].Party.PartyName + " " + window.top.Phrase[window.top.SelectedVoice][67];
+						else 
+						{
+							buttonText += window.top.Candidates[j].CandidateName;
+							if (window.top.PrintCandidatePartyLabel)
+								buttonText += " " + window.top.Candidates[j].Party.PartyLabel;
+						}
+					}
 					else
 					{
 						buttonText += " <img src=\"" + window.top.Candidates[j].CandidatePhoto;
 						buttonText += "\" style=\"vertical-align:middle\" /> ";
 						buttonText += window.top.Candidates[j].CandidateName + " ";
-						buttonText += window.top.Candidates[j].Party.PartyLabel;
+						if ((window.top.EnableScreenReading) && (window.top.Candidates[j].Party.PartyName != ""))
+							buttonText += window.top.Candidates[j].Party.PartyName + " " + window.top.Phrase[window.top.SelectedVoice][67];
+						else if (window.top.PrintCandidatePartyLabel)
+							buttonText += window.top.Candidates[j].Party.PartyLabel;
 					}
+					buttonText += " " + window.top.Phrase[window.top.SelectedVoice][43];
 				}
 			}
 
 			if (foundCandidate < window.top.Contests[i].NumberOfCandidatesToSelect) 
 			{
 				if (foundCandidate > 0) buttonText += ", ";
-				buttonText += window.top.NoSelection;
+				//buttonText += window.top.NoSelection;
+				buttonText += window.top.Phrase[window.top.SelectedVoice][44]; //"No Selection"
 				window.top.Contests[i].ButtonIndex = contestButtonIndex;
 			}
 			
@@ -161,7 +235,10 @@ function loadContests(startingFrom)
 		i++;	
 	}
 	
-	if (contestButtonIndex < window.top.NumberOfContestButtonsOnReview)
+	if ((document.getElementById(theButton).innerHTML == window.top.MoreContests) && (!window.top.EnableScreenReading))
+		contestButtonIndex = window.top.NumberOfContestButtonsOnReview;
+	
+	if (contestButtonIndex < window.top.NumberOfContestButtonsOnReview) 	
 	{ 
 		theButton = "contestButton" + contestButtonIndex;
 		document.getElementById(theButton).style.visibility = "visible";
@@ -172,19 +249,34 @@ function loadContests(startingFrom)
 		contestButtonIndex++;
 	}
 	
+	if ((contestButtonIndex < window.top.NumberOfContestButtonsOnReview) && (!window.top.isMobile.any()))
+	{ 
+		theButton = "contestButton" + contestButtonIndex;
+		document.getElementById(theButton).style.visibility = "visible";
+		document.getElementById(theButton).style.color = window.top.SubmitButtonColor;
+		document.getElementById(theButton).style.background = window.top.SubmitButtonBackground;
+		document.getElementById(theButton).style.font= window.top.SubmitButtonFont;
+		document.getElementById(theButton).innerHTML = window.top.RejectBallot;
+		contestButtonIndex++;
+	}
+	
 	while (contestButtonIndex < window.top.NumberOfContestButtonsOnReview)
 	{
 		theButton = "contestButton" + contestButtonIndex;
 		document.getElementById(theButton).style.visibility = "hidden";
 		contestButtonIndex++;
 	}
-	setTimeout("self.document.forms[0].contestButton0.focus();", 200);
+	
+	if (window.top.EnableScreenReading) 
+		setTimeout("document.getElementById(\"myHeading\").focus()", 200);
+	else
+		setTimeout("self.document.forms[0].contestButton0.focus();", 200);
 }
 
 function scrollDown(selection)
 {	
 	var startingFrom = 0;
-	for (j=0;j<window.top.NumberOfContests;j++)
+	for (j=0;j<window.top.Contests.length;j++)
 	{
 		if (window.top.Contests[j].ButtonIndex == selection) startingFrom = j+1;
 		window.top.Contests[j].ButtonIndex = -1;
@@ -197,7 +289,7 @@ function scrollUp(selection)
 {	
 	var startingFrom = 0;
 	
-	for (j=0;j<window.top.NumberOfContests;j++)
+	for (j=0;j<window.top.Contests.length;j++)
 	{
 		if (window.top.Contests[j].ButtonIndex == selection) startingFrom = j-window.top.NumberOfContestButtonsOnReview;
 		window.top.Contests[j].ButtonIndex = -1;
@@ -210,10 +302,11 @@ function scrollUp(selection)
 </script>
 </head>
 
-<body onLoad="JavaScript:loadContests(0);" style="width: 100%; height: 100%; margin:0px auto; overflow-y:hidden">
+<body id="myDocument" onLoad="JavaScript:loadContests(0);" style="width: 100%; height: 100%; margin:0px auto">
 <form id="myForm">
 <script language="JavaScript">
-document.write("<table style=\"height:100%;width:100%;\" border=\"0\" cellspacing=\"3\" cellpadding=\"0\" bgcolor=\"");
+window.top.document.title = window.top.Phrase[window.top.SelectedVoice][30] + " | " + window.top.BallotName;
+document.write("<table role=\"presentation\" style=\"height:100%;width:100%;\" border=\"0\" cellspacing=\"3\" cellpadding=\"0\" bgcolor=\"");
 document.write(window.top.SelectionColor);
 document.write("\"><tr>\n");
 
@@ -221,8 +314,13 @@ document.write("<td valign=\"top\" align=\"center\" bgcolor=\"");
 document.write(window.top.SelectionColor);
 document.write("\">\n");
 
-document.write("<p id='headingParagraph'><font id='myHeading' size=\"10\">Ballot Review</font></p>");
-document.write("<p id='headingParagraph2'><font id='smallHeading' size=\"5\">Touch a contest to change your selection.</font></p><br>");
+document.write("<h1 id='myHeading'");
+if (window.top.EnableScreenReading)
+	document.write(" tabindex=\"-1\"");
+document.write("><font id='myHeadingFont' size=\"10\">" + window.top.Phrase[window.top.SelectedVoice][30] + "</font></h1>");
+
+
+document.write("<h2 id='headingParagraph2'><font id='smallHeading' size=\"5\">" + window.top.Phrase[window.top.SelectedVoice][31] + "</font></h2><br>");
 
 for (i=0;i<window.top.NumberOfContestButtonsOnReview;i++)
 {
@@ -232,7 +330,7 @@ for (i=0;i<window.top.NumberOfContestButtonsOnReview;i++)
 	document.write(i);
 	document.write("\" onClick=\"contestSelected('");
 	document.write(i);
-	document.write("')\">Contest</button></td></tr>");
+	document.write("')\">" + window.top.Phrase[window.top.SelectedVoice][14] + "</button></td></tr>");
 }
 
 </script>
@@ -245,6 +343,22 @@ for (i=0;i<window.top.NumberOfContestButtonsOnReview;i++)
 </table>
 </form>
 
+
+<div id = 'zoomButtons'>
+</br>
+<input type="image" id="outZoom" src="ZoomOut.png" onclick="zoomOut()" > </br> </br>
+<input type="image" id="inZoom" src="ZoomIn.png" onclick="zoomIn()" >
+
+<script language="JavaScript">
+	if (!window.top.UseZoom)
+	{
+		var div = document.getElementById( "zoomButtons" );
+		div.style.display = "none";
+	}
+</script>
+
+</br>
+</div>
 <script language="JavaScript" src="TabAndEnter.js"> </script>
 </body>
 </html>

@@ -284,7 +284,8 @@ for (c=0;c<window.top.NumberOfPropsAndAmends;c++)
 	
 	positive = "Yes";
 	negative = "No";
-	bcPropOrAmendOptions = "bcPropOrAmendOptions" + c;
+	
+		bcPropOrAmendOptions = "bcPropOrAmendOptions" + c;
 	bcPropOrAmendOptionsText = window.top.getCookie(bcPropOrAmendOptions);
 	
 	for (x=0;x<window.top.PropOrAmendOptionsArray.length;x++)
@@ -292,8 +293,17 @@ for (c=0;c<window.top.NumberOfPropsAndAmends;c++)
 		if (window.top.PropOrAmendOptionsArray[x] == bcPropOrAmendOptionsText)
 		{
 			j = bcPropOrAmendOptionsText.split("/");
-			positive = j[0];
-			negative = j[1];
+			
+			if (j[0] == "Accept")
+			{
+				positive = "Phrase[SelectedVoice][28]";
+				negative = "Phrase[SelectedVoice][29]";
+			}
+			else
+			{
+				positive = "Phrase[SelectedVoice][0]";
+				negative = "Phrase[SelectedVoice][1]";
+			}
 		}
 	}
 
@@ -301,7 +311,7 @@ for (c=0;c<window.top.NumberOfPropsAndAmends;c++)
 	document.write(CandidateIndex);
 	document.write("] = new Candidate('");
 	document.write(CandidateIDs[CandidateIndex++]);
-	document.write("', '" + positive + "', Parties[");
+	document.write("', " + positive + ", Parties[");
 	document.write(PropOrAmendPartyIndex);
 	document.write("], Contests[");
 	document.write(ContestIndex);
@@ -311,31 +321,32 @@ for (c=0;c<window.top.NumberOfPropsAndAmends;c++)
 	document.write(CandidateIndex);
 	document.write("] = new Candidate('");
 	document.write(CandidateIDs[CandidateIndex++]);
-	document.write("', '" + negative + "', Parties[");
+	document.write("', " + negative + ", Parties[");
 	document.write(PropOrAmendPartyIndex);
 	document.write("], Contests[");
 	document.write(ContestIndex++);
 	document.write("], \"none\", \"\", \"\", \"\", \"\");\n");
 }
 
+
 document.write("\n");
 document.write("Candidates[");
 document.write(CandidateIndex++);
-document.write("] = new Candidate(\"Set1\", \"Very Fast\", Parties[");
+document.write("] = new Candidate(\"Set1\", Phrase[SelectedVoice][16], Parties[");
 document.write(WriteInPartyIndex);
 document.write("], Contests[0], \"none\", \"\", \"\", \"\", \"\");\n");
 
 document.write("\n");
 document.write("Candidates[");
 document.write(CandidateIndex++);
-document.write("] = new Candidate(\"Set2\", \"Fast\", Parties[");
+document.write("] = new Candidate(\"Set2\", Phrase[SelectedVoice][17], Parties[");
 document.write(WriteInPartyIndex);
 document.write("], Contests[0], \"none\", \"\", \"\", \"\", \"\");\n");
 
 document.write("\n");
 document.write("Candidates[");
 document.write(CandidateIndex);
-document.write("] = new Candidate(\"Set3\", \"Average\", Parties[");
+document.write("] = new Candidate(\"Set3\", Phrase[SelectedVoice][18], Parties[");
 document.write(WriteInPartyIndex);
 document.write("], Contests[0], \"none\", \"\", \"\", \"\", \"\");\n");
 document.write("Candidates[");
@@ -349,14 +360,14 @@ document.write("].WhenSelected = new Date();\n");
 document.write("\n");
 document.write("Candidates[");
 document.write(CandidateIndex++);
-document.write("] = new Candidate(\"Set4\", \"Slow\", Parties[");
+document.write("] = new Candidate(\"Set4\", Phrase[SelectedVoice][19], Parties[");
 document.write(WriteInPartyIndex);
 document.write("], Contests[0], \"none\", \"\", \"\", \"\", \"\");\n");
 
 document.write("\n");
 document.write("Candidates[");
 document.write(CandidateIndex++);
-document.write("] = new Candidate(\"Set5\", \"Very Slow\", Parties[");
+document.write("] = new Candidate(\"Set5\", Phrase[SelectedVoice][20], Parties[");
 document.write(WriteInPartyIndex);
 document.write("], Contests[0], \"none\", \"\", \"\", \"\", \"\");\n");
 

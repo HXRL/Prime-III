@@ -1,0 +1,81 @@
+<html>
+	<head>
+		<script>
+			
+			var doPop = true;
+			function populateVoiceList() 
+			{
+				if(typeof speechSynthesis === 'undefined') 
+				{
+					return;
+				}
+				
+				if(doPop)
+				{
+					console.log("called");
+					voices = speechSynthesis.getVoices();
+
+					for(i = 0; i < voices.length ; i++) 
+					{
+						if(voices[i].lang == "en-US")
+						{
+							var option = document.createElement('option');
+							option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
+	
+							if(voices[i].default) 
+							{
+								option.textContent += ' -- DEFAULT';
+							}
+
+							option.setAttribute('data-lang', voices[i].lang);
+							option.setAttribute('data-name', voices[i].name);
+							document.getElementById("voiceSelect").appendChild(option);
+						}
+				
+					}//end for
+				}//end if do pop
+				
+				doPop = false;
+				
+			} //end function
+
+			//populateVoiceList();
+			if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) 
+			{
+				
+					speechSynthesis.onvoiceschanged = populateVoiceList;
+					
+					
+				
+			}
+
+		</script>
+	</head>
+	<body onload="">
+		<select id="voiceSelect"></select>
+		<script>
+			document.getElementById("voiceSelect").onchange = function(event) 
+			{
+				var synth = window.speechSynthesis;
+				event.preventDefault();
+				voices = speechSynthesis.getVoices();
+
+				var voiceName = "";
+				var utterThis; 
+				var selectedOption = document.getElementById("voiceSelect").selectedOptions[0].getAttribute('data-name');
+				for(var i = 0; i < voices.length ; i++) 
+				{
+					if(voices[i].name === selectedOption) 
+					{
+						
+						voiceName = voices[i].name;
+						utterThis = new SpeechSynthesisUtterance("Hello. This is a test of the "+voiceName+" voice");
+						utterThis.voice = voices[i];
+					}
+				}
+				synth.speak(utterThis);
+  
+			}
+		</script>
+	</body>
+</html>

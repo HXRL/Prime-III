@@ -1,0 +1,110 @@
+<!-- 
+Prime III
+
+URL: http://www.PrimeVotingSystem.org
+
+Copyright (c) 2015 University of Florida
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+ -->
+
+<html style="width: 100%; height: 100%;">
+<head>
+<link rel="stylesheet" type = "text/css" href="borders.css">
+<script language="JavaScript" src="Phrases.js"> </script>
+<script language="JavaScript">
+function setup()
+{
+	self.document.bgColor = window.top.SelectionColor;
+
+	if ((window.top.EnableScreenReading) && (!window.top.VotingStarted))
+		self.location = "ballot.html";
+	else if (window.top.EnableScreenReading)
+		setTimeout("document.getElementById(\"myHeading\").focus()", 200);
+	else if (window.top.UseAudio)
+	{
+		window.top.ballotFrame.stopSpeaking();
+		window.top.ballotFrame.setItemsToSpeak("Deselect"); //Add Deselect Option
+		window.top.ballotFrame.saySelected();
+		
+		if (!window.top.DisableAudio) 
+			window.top.ballotFrame.speakText();
+		setTimeout("document.getElementById(\"closeDeselect\").focus()", 200);
+	}
+	else
+		setTimeout("document.getElementById(\"closeDeselect\").focus()", 200);
+
+}
+
+function goBack()
+{
+	window.top.contestSelectedReview("CandidateDeselect");
+}
+</script>
+</head>
+
+<body style="width: 100%; height: 100%; margin:0px auto; overflow-y:hidden" onLoad="JavaScript:setup();">
+<form id="myForm">
+
+<script language="JavaScript">
+document.write("<center><h1 id='myHeading'");
+if (window.top.EnableScreenReading)
+	document.write(" tabindex=\"-1\"");
+document.write("><font id='myHeadingFont' size=\"12\">");
+
+//Display the Deselect Message  
+var deselectText = "<br>";
+
+if (window.top.Contests[window.top.CurrentContest].NumberOfCandidatesToSelect > 1)
+{
+	deselectText += Phrase[SelectedVoice][92] + " " + window.top.Contests[window.top.CurrentContest].NumberOfCandidatesToSelect + " " + Phrase[SelectedVoice][27] + ". <br><br> ";
+}
+
+deselectText += Phrase[SelectedVoice][37] + " ";
+	
+var foundCandidate = 0;
+for (j=0;j<window.top.Candidates.length;j++)
+{
+	if ((window.top.Candidates[j].Contest.ContestID == window.top.Contests[window.top.CurrentContest].ContestID) && (window.top.Candidates[j].CandidateSelected))
+	{
+		if ((window.top.Contests[window.top.CurrentContest].NumberOfSelectedCandidates == (foundCandidate+1)) && (window.top.Contests[window.top.CurrentContest].NumberOfCandidatesToSelect > 1))
+			deselectText += " and ";
+		else if (foundCandidate > 0) deselectText += ", ";
+	
+		deselectText += window.top.Candidates[j].CandidateName;
+	
+		foundCandidate++;					
+	}		
+}
+
+
+document.write(deselectText);
+
+document.write("<br><br>");
+document.write(Phrase[SelectedVoice][139]);
+document.write("</font></H1></center>");
+
+document.write("<br><br><br><center><button style=\"font: bold 18px Arial;width:1500;height:110\" type=\"button\" id=\"closeDeselect\" onClick=\"goBack()\">")
+document.write(Phrase[SelectedVoice][34]);
+document.write("</button></center>");
+
+document.getElementById("closeDeselect").style.visibility = "visible";
+document.getElementById("closeDeselect").style.color = window.top.ReviewButtonColor;
+document.getElementById("closeDeselect").style.background = window.top.ReviewButtonBackground;
+document.getElementById("closeDeselect").style.font= window.top.ReviewButtonFont;
+
+</script>
+</form>
+</body>
+</html>

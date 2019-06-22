@@ -1,0 +1,46 @@
+<html>
+<head>
+
+
+<script language="JavaScript">
+function setVoice()
+{
+	voicesAvailable = speechSynthesis.getVoices();
+
+	if (voicesAvailable.length == 0)
+	{
+		setTimeout("setVoice()", 100);
+		return;
+	}
+	else
+	{	
+		var i = 0;
+		var voiceText = " ";
+		for (i = 0; i < voicesAvailable.length; i++) 
+		{
+			voiceText += voicesAvailable[i].name;
+			voiceText += "<br>\n";
+		}
+		
+		self.document.getElementById("voices").innerHTML = voiceText;
+	}
+}
+
+	var ChromeSpeechSynthesizer = new SpeechSynthesisUtterance('I am Chrome');
+	
+	setVoice();
+
+
+</script>
+
+</head>
+
+
+<body>
+<h1 id="voices">
+Voices
+</h1>
+
+</body>
+
+</html>

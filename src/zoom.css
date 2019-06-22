@@ -1,0 +1,20 @@
+body{
+  margin: 0px;
+}
+
+.panel{
+  float: right;
+  margin: 0px;
+  padding: 50% 0;
+}
+
+#zoomButtons {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  margin-top: -2.5em;
+  border-top-style: solid;
+  border-left-style: solid;
+  border-bottom-style: solid;
+  border-width: thin;
+}

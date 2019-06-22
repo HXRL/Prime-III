@@ -35,17 +35,20 @@ function keyHandler(e)
 {
     if ((e.keyCode == window.top.TABKEY) || (e.keyCode == 39) || (e.keyCode == 40) || (e.keyCode == 32))
     {
-        e.preventDefault(); //prevent the tab from moving to the next item and from propogating through DOM
+        if (!window.top.SynchAudioAndVideo)
+        	e.preventDefault(); //prevent the tab from moving to the next item and from propogating through DOM
 		window.top.processTab();
     }
     else if (e.keyCode == window.top.ENTERKEY)
     {
-        e.preventDefault(); //prevent the tab from moving to the next item and from propogating through DOM
+        if (!window.top.SynchAudioAndVideo)
+        	e.preventDefault(); //prevent the tab from moving to the next item and from propogating through DOM
 		window.top.processEnter();
     }
     else if ((e.keyCode == 38) || (e.keyCode == 37))
     {
-        e.preventDefault(); //prevent the tab from moving to the next item and from propogating through DOM
+        if (!window.top.SynchAudioAndVideo)
+        	e.preventDefault(); //prevent the tab from moving to the next item and from propogating through DOM
 		window.top.processBack();
 /*
 Right = 39

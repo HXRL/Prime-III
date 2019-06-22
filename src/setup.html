@@ -25,11 +25,21 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 function setup()
 {
 	self.document.bgColor = window.top.SelectionColor;
-	window.top.setup();
+	
+	var link = document.createElement('link')
+	link.setAttribute('rel', 'stylesheet')
+	link.setAttribute('type', 'text/css')
+	link.setAttribute('href', 'borders.css')
+	document.getElementsByTagName('head')[0].appendChild(link)
+
+	if (window.top.EnableScreenReading)
+		self.location = "OverVote.html";
+	else
+		window.top.setup();
 }
 </script>
 </head>
 
-<body style="width: 100%; height: 100%; margin:0px auto; overflow-y:hidden" onLoad="JavaScript:setup();">
+<body style="width: 100%; height: 100%; height: 100%; margin:0px auto; overflow-y:hidden" onLoad="JavaScript:setup();">
 </body>
 </html>

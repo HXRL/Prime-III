@@ -21,6 +21,10 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 <html style="width: 100%; height: 100%;">
 <head>
+<link rel="stylesheet" type = "text/css" href="borders.css">
+<link rel="stylesheet" type = "text/css" href="zoom.css">
+<script language="JavaScript" src="zoom.js"> </script>
+
 <script language="JavaScript">
 var WriteInCandidateName = "";
 var WriteInCandidateWasNamed = false;
@@ -28,6 +32,10 @@ var LastSelectedKey;
 
 function loadCandidate()
 {
+	if ((window.top.EnableScreenReading) && (!window.top.VotingStarted))
+		self.location = "review.html";
+
+	window.top.document.title = window.top.Phrase[window.top.SelectedVoice][32] + " | " + window.top.BallotName;
 	self.document.bgColor = window.top.SelectionColor;
 	if ((window.top.Candidates[window.top.CurrentCandidateIndex].CandidateName != window.top.WriteIn) && (window.top.Candidates[window.top.CurrentCandidateIndex].CandidateName != window.top.Candidates[window.top.CurrentCandidateIndex].WriteInDefaultName))
 	{
@@ -40,7 +48,14 @@ function loadCandidate()
 
 function getFocus()
 {
-	setTimeout("self.document.forms[0].WriteInCandidateName.focus()", 200);
+	if (window.top.EnableScreenReading)
+		setTimeout("document.getElementById(\"myHeading\").focus()", 200);
+	else if (window.top.UseWriteInKeyboard)
+	{
+		if (window.top.UseAudio) setTimeout("self.document.forms[0].WriteInCandidateName.focus()", 200);
+		WriteInCandidateNameLength = self.document.forms[0].WriteInCandidateName.value.length+5;
+		setTimeout("self.document.forms[0].WriteInCandidateName.setSelectionRange(" + WriteInCandidateNameLength + "," + WriteInCandidateNameLength + ")", 300);
+	}
 }
 
 function goBack()
@@ -60,14 +75,24 @@ function buttonReset()
 
 function keyPress(e)
 {
-	if ((e.keyCode == window.top.TABKEY) || (e.keyCode == window.top.ENTERKEY)) keyHandler(e);
-	else setTimeout("assignWriteInCandidateName()", 5);
+	if ((!window.top.EnableScreenReading) && (window.top.UseWriteInKeyboard))
+	{
+		if ((e.keyCode == window.top.TABKEY) || (e.keyCode == window.top.ENTERKEY)) 	
+			keyHandler(e);
+	}
+	setTimeout("assignWriteInCandidateName()", 100);
 }
 
 function assignWriteInCandidateName()
 {
-	WriteInCandidateName = self.document.forms[0].WriteInCandidateName.value.replace(/\n\r?/g, ' ');
-	getFocus();
+	WriteInCandidateName = self.document.forms[0].WriteInCandidateName.value.replace(/&/g, ' ');
+	WriteInCandidateName = WriteInCandidateName.replace(/_/g, ' ');
+	WriteInCandidateName = WriteInCandidateName.replace(/\?/g, ' ');
+	WriteInCandidateName = WriteInCandidateName.replace(/\n/g, '');
+	WriteInCandidateName = WriteInCandidateName.replace(/\r/g, '');
+	self.document.forms[0].WriteInCandidateName.value = WriteInCandidateName;
+
+	if (!window.top.EnableScreenReading) getFocus();
 }
 
 function keySelected(selectedKey)
@@ -75,6 +100,9 @@ function keySelected(selectedKey)
 	LastSelectedKey = selectedKey;
 	if (selectedKey == "submit")
 	{
+		if ((window.top.EnableScreenReading) || (!window.top.WriteInBoxIsReadOnly))
+			assignWriteInCandidateName();
+		
 		if (WriteInCandidateName.length > 0)
 		{
 			if (!window.top.Candidates[window.top.CurrentCandidateIndex].CandidateSelected)
@@ -99,7 +127,7 @@ function keySelected(selectedKey)
 		}
 
 		buttonReset();
-					
+			
 		window.top.contestSelectedReview(window.top.WriteIn);
 	}
 	else if (selectedKey == "backspace")
@@ -134,10 +162,10 @@ function keySelected(selectedKey)
 </script>
 </head>
 
-<body onLoad="JavaScript:loadCandidate();" style="width: 100%; height: 100%; margin:0px auto; overflow-y:hidden">
+<body id="myDocument" onLoad="JavaScript:loadCandidate();" style="width: 100%; height: 100%; margin:0px auto" onSubmit="return false">
 <form id="myForm">
 <script language="JavaScript">
-document.write("<table style=\"width:100%;\" border=\"0\" cellspacing=\"3\" cellpadding=\"0\" bgcolor=\"");
+document.write("<table role=\"presentation\" style=\"width:100%;\" border=\"0\" cellspacing=\"3\" cellpadding=\"0\" bgcolor=\"");
 document.write(window.top.SelectionColor);
 document.write("\"><tr>\n");
 
@@ -145,22 +173,72 @@ document.write("<td valign=\"top\" align=\"center\" bgcolor=\"");
 document.write(window.top.SelectionColor);
 document.write("\">\n");
 
-document.write("<p id='headingParagraph'><font id='myHeading' size=\"10\">Candidate Write In</font></p>");
-document.write("<p id='headingParagraph2'><font id='smallHeading' size=\"5\">Type in the candidate's name and press submit.</font></p><br>");
+document.write("<h1 id='myHeading'");
+if (window.top.EnableScreenReading)
+	document.write(" tabindex=\"-1\"");
+document.write("><font id='myHeadingFont' size=\"10\">" + window.top.Phrase[window.top.SelectedVoice][32] + "</font></h1>");
+
+
+document.write("<h2 id='headingParagraph2'><font id='smallHeading' size=\"5\">" + window.top.Phrase[window.top.SelectedVoice][33] + "</font></h2><br>");
 </script>
 
 <script language="JavaScript">
 
-document.write("<textarea ");
 
-if (window.top.WriteInBoxIsReadOnly)
-	document.write("readonly ");
+if ((window.top.EnableScreenReading) || (!window.top.UseWriteInKeyboard))
+	document.write("<input name=\"WriteInCandidateName\" style=\"font: bold 28px Arial,serif;width:90%;height:50px\" onKeyPress=\"keyPress(event)\" maxlength=\"9000\" />");
+else
+{
+	document.write("<textarea ");
 
-document.write("name=\"WriteInCandidateName\" onKeyPress=\"keyPress(event)\" onBlur=\"getFocus()\" rows=\"1\" maxlength=\"140\" cols=\"140\" style=\"resize: none; overflow: hidden;height: 50px;width: 90%;font: bold 28px arial,serif\">");
+	if (window.top.WriteInBoxIsReadOnly)
+		document.write("readonly ");
+
+	document.write("name=\"WriteInCandidateName\" onKeyPress=\"keyPress(event)\" onBlur=\"getFocus()\" rows=\"1\" maxlength=\"140\" cols=\"140\" style=\"resize: none; overflow: hidden;height: 50px;width: 90%;font: bold 28px arial,serif\"></textarea>");
+}
+
+if (!window.top.EnableScreenReading)
+	setTimeout("self.document.forms[0].WriteInCandidateName.focus()", 200);
+
+document.onkeydown = function(e) 
+{ 
+	if ((!window.top.EnableScreenReading) || (window.top.UseWriteInKeyboard))
+	{
+		if ((e.keyCode == window.top.TABKEY) || (e.keyCode == 39) || (e.keyCode == 40))
+		{
+			if (!window.top.UseAudio) return;
+			e.preventDefault(); //prevent the tab from moving to the next item and from propogating through DOM
+			window.top.processTab();
+		}
+		else if (e.keyCode == window.top.ENTERKEY)
+		{
+			if (window.top.UseAudio) e.preventDefault(); //prevent the tab from moving to the next item and from propogating through DOM
+			window.top.processEnter();
+		}
+		else if ((e.keyCode == 38) || (e.keyCode == 37))
+		{
+			if (!window.top.UseAudio) return;
+			e.preventDefault(); //prevent the tab from moving to the next item and from propogating through DOM
+			window.top.processBack();
+		}
+		else
+		{
+			setTimeout("assignWriteInCandidateName()", 100);
+		}
+	}
+
+/*
+Right = 39
+Left = 37
+Down = 40
+Up =    38
+Space = 32 
+*/
+}
 
 </script>
 
-</textarea><br><br>
+<br><br>
 </td></tr>
 
 <script language="JavaScript">
@@ -171,19 +249,22 @@ for (row=0;row<window.top.KeyboardRows;row++)
 		document.write("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
 	if (row > 1) 
 		document.write("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
-
-	for (col=0;col<window.top.Keyboard[row].length;col++)
+ 
+	if (window.top.UseWriteInKeyboard)
 	{
-		document.write("<button style=\"");
-		document.write(window.top.KeyFont);
-		document.write("\" type=\"button\" id=\"button");
-		document.write(window.top.Keyboard[row][col]);
-		document.write("\" onClick=\"keySelected('");
-		if (window.top.Keyboard[row][col] == '\'') document.write("\\");
-		document.write(window.top.Keyboard[row][col]);
-		document.write("')\">");
-		document.write(window.top.Keyboard[row][col]);
-		document.write("</button>&nbsp;&nbsp;");
+		for (col=0;col<window.top.Keyboard[row].length;col++)
+		{
+			document.write("<button style=\"");
+			document.write(window.top.KeyFont);
+			document.write("\" type=\"button\" id=\"button");
+			document.write(window.top.Keyboard[row][col]);
+			document.write("\" onClick=\"keySelected('");
+			if (window.top.Keyboard[row][col] == '\'') document.write("\\");
+			document.write(window.top.Keyboard[row][col]);
+			document.write("')\">");
+			document.write(window.top.Keyboard[row][col]);
+			document.write("</button>&nbsp;&nbsp;");
+		}
 	}
 	document.write("</td></tr>");
 }
@@ -193,23 +274,26 @@ document.write("<tr valign=\"top\" align=\"center\"><td>");
 
 	document.write("<button style=\"");
 	document.write(window.top.WriteInKeyFont);
-	document.write("\" type=\"button\" id=\"GoBackButton\" onClick=\"goBack()\">Go Back</button>&nbsp;");
+	document.write("\" type=\"button\" id=\"GoBackButton\" onClick=\"goBack()\">" + window.top.Phrase[window.top.SelectedVoice][34] + "</button>&nbsp;");
 
+	if (window.top.UseWriteInKeyboard)
+	{
+		document.write("<button style=\"");
+		document.write(window.top.WriteInKeyFont);
+		document.write("\" type=\"button\" id=\"ClearButton\" onClick=\"keySelected(\'clear\')\">" + window.top.Phrase[window.top.SelectedVoice][23] + "</button>&nbsp;");
+
+		document.write("<button style=\"");
+		document.write(window.top.WriteInKeyFont);
+		document.write("\" type=\"button\" id=\"BackSpaceButton\" onClick=\"keySelected(\'backspace\')\">" + window.top.Phrase[window.top.SelectedVoice][6] + "</button>&nbsp;");
+
+		document.write("<button style=\"");
+		document.write(window.top.WriteInKeyFont);
+		document.write("\" type=\"button\" id=\"SpaceButton\" onClick=\"keySelected(\' \')\">" + window.top.Phrase[window.top.SelectedVoice][35] + "</button>&nbsp;");
+	}
+	
 	document.write("<button style=\"");
 	document.write(window.top.WriteInKeyFont);
-	document.write("\" type=\"button\" id=\"ClearButton\" onClick=\"keySelected(\'clear\')\">Clear</button>&nbsp;");
-
-	document.write("<button style=\"");
-	document.write(window.top.WriteInKeyFont);
-	document.write("\" type=\"button\" id=\"BackSpaceButton\" onClick=\"keySelected(\'backspace\')\">Backspace</button>&nbsp;");
-
-	document.write("<button style=\"");
-	document.write(window.top.WriteInKeyFont);
-	document.write("\" type=\"button\" id=\"SpaceButton\" onClick=\"keySelected(\' \')\">Space</button>&nbsp;");
-
-	document.write("<button style=\"");
-	document.write(window.top.WriteInKeyFont);
-	document.write("\" type=\"button\" id=\"SubmitButton\" onClick=\"keySelected(\'submit\')\">Submit</button>&nbsp;");
+	document.write("\" type=\"button\" id=\"SubmitButton\" onClick=\"keySelected(\'submit\')\">" + window.top.Phrase[window.top.SelectedVoice][36] + "</button>&nbsp;");
 
 
 document.write("</td></tr>");
@@ -224,6 +308,22 @@ document.write("</td></tr>");
 
 </form>
 
+
+<div id = 'zoomButtons'>
+</br>
+<input type="image" id="outZoom" src="ZoomOut.png" onclick="zoomOut()" > </br> </br>
+<input type="image" id="inZoom" src="ZoomIn.png" onclick="zoomIn()" >
+
+<script language="JavaScript">
+	if (!window.top.UseZoom)
+	{
+		var div = document.getElementById( "zoomButtons" );
+		div.style.display = "none";
+	}
+</script>
+
+</br>
+</div>
 <script language="JavaScript" src="TabAndEnter.js"> </script>
 </body>
 </html>

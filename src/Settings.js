@@ -20,26 +20,43 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-var TextToSpeechEngine = "Speakjs"; //Speakjs or SitePal
-var meSpeakVoice = "voices/en/en-us.json";
-var PrintThe = "Ballot"; //Ballot or QRCode or BallotAndQRCode or PDFText or PDFImage or Nothing
-var UserInterface = "LEVI"; //Basic or LEVI
+var VotingStationID = "03";
+var AppName = "Gators";
+var EnableScreenReading = false;
+var UseAccessCode = true;
+var RotateCandidates = 0;
+var UseTallyMode = false;
+var ReviewMode = "Review"; //ByPass, Review, ReadOnly
+var PrintThe = "BallotAndQRCode"; //Ballot, QRCode, BallotAndQRCodeAndQRCodeText, BallotAndQRCode, Download, BallotWithOvals, BallotWithOvalsLeftRight, Ovals, Nothing
+var PrintCandidateID = false; //July 1, 2016
+var PrintCheckbox = false; //November 21, 2018
+var PrintCandidatePartyLabel = true;
+var LinesPerPrintedPage = 13;
+var UseSettings = true; //July 1, 2016
+var UseVoteByParty = true; //July 1, 2016
+var UserInterface = "LEVI"; //Basic or LEVI or TIPI
 var AllowVotersToSelectAudio = true;
-var AllowOverVotes = false; 
+var UseZoom = true;
 var UseAudio = true;
 var MicIsOn = true;
-var UseAccessCode = true;
-var SoundDetector = "PocketSphinx"; //Java or PocketSphinx
+var AllowOverVotes = false; 
+var DeselectCandidates = false;
+var SynchAudioAndVideo = false;
+var ConfirmBallotRejection = true;
+var SoundDetector = "PocketSphinx"; //Chrome, Java or PocketSphinx (Note: Set Firefox media.navigator.permission.disabled)
 var SoundDetectorSensitivity = 4.5; //default is 10, we have been using 3.5, the higher the number the less sensitive
 var SoundDetectorSensitivityMax = 7; //maximum sensitivity level
 var SoundDetectorSensitivityIncrement = 0.5;
-var SayVote = " say vote";
+var SayVote = Phrase[SelectedVoice][105]; //" say vote";
 var BallotImageType =".png";
-var QRCodeBaseURL = "p3v.us/i.htm"; //This is the location for Prime III on the web for QR Code Processing
+var QRCodeBaseURL = "p3v.us/i.htm"; //This is the location for Prime III on the web for QR Code Processing. If not processing on the web, leave this blank. "p3v.us/i.htm"
 var VoterIsVerifyingQRCode = false;
 var VotedMenuString = " ***";
+var TextToSpeechEngine = "Chrome"; //Chrome or Speakjs
+var CastVoteRecordID = "";
+var PrintCastVoteRecordOnBallot = false;
 
-var VoterBrowser = "Firefox";
+var VoterBrowser = "Chrome";
 var theBrowser = navigator.userAgent.toLowerCase();
 
 var isMobile = {
@@ -64,7 +81,6 @@ var isMobile = {
 };
 
 
-
 var CalculateTimetoVote = true;
 var StartedVotingAt = new Date();
 var VotingDoneAt = new Date();
@@ -79,18 +95,23 @@ var LastTimeSelectionWasMade = new Date();
 var TimeBetweenSelections = 1000;
 
 var NumberOfCandidateButtonsColumns = 2; // Set to 1 or 2
-var NumberOfCandidateButtons = 12; //6 or 12
-var CandidateButtonFontAndSize = "font: bold 18px Arial;width:500;height:90";
+var NumberOfCandidateButtons = 10; //6, 8, 10 or 12
+var CandidateButtonFontAndSize = "font: bold 18px Arial;width:500;height:70";
+var NavigationButtonFontAndSize = "font: bold 18px Arial;width:200;height:90";
+var ScreenReaderSelectionButtonFontAndSize = "font: bold 14px Arial;width:400;height:40";
+var TIPINextButtonFont = "font: bold 24px Arial;width:500;height:100";
+var AccessButtonFont = "bold 24px Arial;width:300;height:100";
+var AccessCodeBoxFont = "font: bold 18px Arial;width:910;height:50";
 var NumberOfContestButtonsOnReview = 7;
-var SoundListeningPeriod = 1000; //In milliseconds
+var SoundListeningPeriod = 1500; //In milliseconds
 var SpeakjsTalkEndedDelay = 900; //Note: SpeakjsTalkEndedDelay must be less than SoundListeningPeriod
 var SoundDetectionPeriod = 500;
 var SitePalTalkEndedDelay = 1500;
 var SpeakjsCurrentTime = 9999;
 var SwitchIsConnected = false;
 
-if (SwitchIsConnected) SayVote += " or press enter. ";
-else SayVote += ". ";
+if (SwitchIsConnected) SayVote += Phrase[SelectedVoice][45]; //" or press enter. ";
+SayVote += ". ";
 
 //SitePal Voice Options
 
@@ -121,16 +142,21 @@ var SelectionColor = "#FFFFDF";
 var DefaultColor = "#BDBDBD";
 var CurrentContest = 0;
 var LoadContest = 0;
-var NumberOfCandidatesInTheCurrentContest = 0;
+var NumberOfCandidatesAvailable = 0;
+var NumberOfWriteInCandidatesAvailable= 0;
 var CurrentContestIndex = -1;
-var SubmitButtonInReviewValue = -2012;
+var SubmitButtonInReviewValue = 2015;
+var RejectButtonInReviewValue = 2016; 
+var RejectBallotYes = -47;
+var RejectBallotNo = -46;
 var CurrentCandidateIndex = 0;
 var MoreButtonIndex = -1;
 
-var SubmitBallot = "--- Submit My Ballot ---";
-var SubmitButtonFont = "bold 40px arial,serif";
-var SubmitButtonColor = "#000000"; //black
-var SubmitButtonBackground = "#FC8700"; //orange
+var RejectBallot = "--- " + Phrase[SelectedVoice][130] + " ---";
+var SubmitBallot = "--- " + Phrase[SelectedVoice][45] + " ---";
+var SubmitButtonFont = "bold 36px arial,serif";
+var SubmitButtonColor = "#FFFFFF"; //white
+var SubmitButtonBackground = "#000000"; //black
 
 var ReviewButtonFont = "bold 24px arial,serif";
 var ReviewButtonColor = "#000000"; //black
@@ -142,44 +168,65 @@ var MoreContestBackground = "#f8f8ff"; //ghostwhite
 
 var KeyFont = "font: bold 40px Arial;width:100;height:100";
 var WriteInKeyFont = "font: bold 40px Arial;width:300;height:100";
-var MoreParties = "<img src=\"downarrow.png\"> &nbsp; MORE PARTIES &nbsp; <img src=\"downarrow.png\">";
-var MorePartiesUp = "<img src=\"uparrow.png\"> &nbsp; MORE PARTIES &nbsp; <img src=\"uparrow.png\">";
-var MoreContests = "<img src=\"downarrow.png\"> &nbsp; MORE CONTESTS &nbsp; <img src=\"downarrow.png\">";
-var MoreContestsUp = "<img src=\"uparrow.png\"> &nbsp; MORE CONTESTS &nbsp; <img src=\"uparrow.png\">";
-var MoreCandidates = "<img src=\"downarrow.png\"> &nbsp; MORE CANDIDATES &nbsp; <img src=\"downarrow.png\">";
-var MoreCandidatesUp = "<img src=\"uparrow.png\"> &nbsp; MORE CANDIDATES &nbsp; <img src=\"uparrow.png\">";
-var NoSelection = "No_Selection";
+var MoreParties = "<img src=\"downarrow.png\"> &nbsp; " + Phrase[SelectedVoice][39] + " &nbsp; <img src=\"downarrow.png\">";
+var MorePartiesUp = "<img src=\"uparrow.png\"> &nbsp; " + Phrase[SelectedVoice][42] + " &nbsp; <img src=\"uparrow.png\">";
+var MoreContests = "<img src=\"downarrow.png\"> &nbsp; " + Phrase[SelectedVoice][40] + " &nbsp; <img src=\"downarrow.png\">";
+var MoreContestsUp = "<img src=\"uparrow.png\"> &nbsp; " + Phrase[SelectedVoice][40] + " &nbsp; <img src=\"uparrow.png\">";
+var MoreCandidates = "<img src=\"downarrow.png\"> &nbsp; " + Phrase[SelectedVoice][38] + " &nbsp; <img src=\"downarrow.png\">";
+var MoreCandidatesUp = "<img src=\"uparrow.png\"> &nbsp; " + Phrase[SelectedVoice][41] + " &nbsp; <img src=\"uparrow.png\">";
+var NoSelection = window.top.Phrase[window.top.SelectedVoice][68];
 var NoSelectionID = "999";
-var VotingInstructions = "<font id=\"PropositionOrAmendmentText\" size=\"8\"><img src=\"leftarrow.png\" align=\"middle\"> To start voting, touch a selection on the left.</font>";
-var WriteIn = "Candidate Write In";
+var VotingInstructions = "<font id=\"PropositionOrAmendmentText\" size=\"8\"><img src=\"leftarrow.png\" align=\"middle\"> " + window.top.Phrase[window.top.SelectedVoice][9] + "</font>";
+var WriteIn = Phrase[SelectedVoice][32]; //"Candidate Write In";
 var WriteInID = "888";
-var WriteInBoxIsReadOnly = true;
+var WriteInBoxIsReadOnly = false;
+var UseWriteInKeyboard = true;
 var AccessCodeBoxIsReadOnly = false;
 var PropositionOrAmendment = "Proposition or Amendment";
+var CenterPropositionOrAmendmentText = false;
 var VoteByParty = "Vote By Party";
-var Settings = "Settings";
+var Settings = Phrase[SelectedVoice][8]; //"Settings"
 var BallotReview = "Ballot Review";
 
 var SpeakingRates = new Array();
 
-if (TextToSpeechEngine == "Speakjs")
-{//Speakjs speaking rates
-	SpeakingRates["Very Fast"] = { "speed":  300 };
-	SpeakingRates["Fast"] = { "speed":  240 };
-	SpeakingRates["Average"] = { "speed":  175 };
-	SpeakingRates["Slow"] = { "speed":  110 };
-	SpeakingRates["Very Slow"] = { "speed":  75 };
-}
-else
-{//SitePal speaking rates
-	SpeakingRates["Very Fast"] = 3;
-	SpeakingRates["Fast"] = 1;
-	SpeakingRates["Average"] = 0;
-	SpeakingRates["Slow"] = -1;
-	SpeakingRates["Very Slow"] = -3;
-}
+SpeakingRates["Very Fast"] = 2;
+SpeakingRates["Fast"] = 1.5;
+SpeakingRates["Average"] = 1;
+SpeakingRates["Slow"] = 0.8;
+SpeakingRates["Very Slow"] = 0.4;
 
 var SpeakingRate = SpeakingRates["Average"];
+
+var ChromeSpeechSynthesizer; //new SpeechSynthesisUtterance('I am Chrome');
+var elapsedTime = 0;
+var VoiceName = "US English Female TTS (by Google)"; //"US English Female TTS (by Google)" or "Alex" or "Google US English" or "Google español" or "native";
+var voicesAvailable; //speechSynthesis.getVoices();
+					
+function setVoice()
+{
+	voicesAvailable = speechSynthesis.getVoices();
+
+	if (voicesAvailable.length == 0)
+	{
+		setTimeout("setVoice()", 100);
+		return;
+	}
+					
+	var i = 0;
+	for (i = 0; i < voicesAvailable.length; i++) 
+	{
+		if (voicesAvailable[i].name == VoiceName) break;
+	}
+	
+	if (i >= voicesAvailable.length) i = 0; //set it back to the default
+						  
+	ChromeSpeechSynthesizer.voiceURI = "native";
+	ChromeSpeechSynthesizer.default = false;
+	ChromeSpeechSynthesizer.rate = 1.0;
+	ChromeSpeechSynthesizer.lang = Voices[SelectedVoice];
+	ChromeSpeechSynthesizer.voice = voicesAvailable[i];
+}
 
 invisibleImage = "invisible.gif";
 checkImage = "check.gif";
@@ -188,10 +235,30 @@ DivOrP = "p";
 check = new Image();
 check.src = checkImage;
 
+function getParty(p)
+{
+	if ((p=="none") || (p=="")) return new Party("","");
+	
+	var plabel = "(" + p +")";
+	for (i=0;i<Parties.length;i++)
+	{
+		if ((Parties[i].PartyName == p) || (Parties[i].PartyLabel == plabel)) return Parties[i];
+	}
+	return new Party("","");
+}
+
+
+function getContest(c)
+{
+	for (i=0;i<Contests.length;i++)
+		if ((Contests[i].ContestName == c) || (Contests[i].ContestID == c)) return Contests[i];
+	return Contests[i-1];
+}
+
 
 function Party(party, plabel)
 {
-	if ((party == WriteIn) || (party == PropositionOrAmendment))
+	if ((party == WriteIn) || (party == PropositionOrAmendment) || (party == ""))
 	{
 		this.PartyName = "";
 		this.PartyLabel = "";
@@ -199,7 +266,11 @@ function Party(party, plabel)
 	else
 	{
 		this.PartyName = party;
-		this.PartyLabel = "(" + plabel +")";
+		
+		if ((plabel == ",") || (plabel == ""))
+			this.PartyLabel = "";
+		else
+			this.PartyLabel = "(" + plabel +")";
 	}
 	this.PartySelected = false;
 	this.ButtonIndex = -1;
@@ -207,25 +278,33 @@ function Party(party, plabel)
 	this.WhenSelected.setFullYear(2800,0,14);
 }
 
-function Candidate(id, cname, party, contest, photo, cnamesl, left, top,line)
+function Candidate(id, cname, party, contest, photo, soundslike, left, top, line)
 {
 	this.CandidateID = id;
 	this.CandidateName = cname;
-	this.Party = party;
-	this.Contest = contest;
+	this.Party = getParty(party);
+	this.Contest = getContest(contest);
 	this.left = left;
 	this.top = top;
 	this.line = line;
-	if (cnamesl == "")
+	if ((soundslike == "") || (soundslike == "undefined"))
 		this.SoundsLike = cname;
 	else
-		this.SoundsLike = cnamesl;
+		this.SoundsLike = soundslike;
 	this.CandidateSelected = false;
 	this.ButtonIndex = -1;
 	this.WhenSelected = new Date();
 	this.WhenSelected.setFullYear(2800,0,14);
 	this.WriteInDefaultName = WriteIn;
-	this.CandidatePhoto = photo;
+	
+	if ((photo != "none") && (photo.trim().length > 0))
+	{
+		var img=new Image();
+    	img.src=photo;	
+    	this.CandidatePhoto = photo;
+    }
+    else
+    	this.CandidatePhoto = "none";
 	
 	if (cname == WriteIn)
 		this.WriteInCandidate = true;
@@ -247,16 +326,32 @@ function Candidate(id, cname, party, contest, photo, cnamesl, left, top,line)
 	
 }
 
-function Contest(id, ctype, nocts, coname, soundslike, patext)
+function Contest(id, ctype, nocts, coname, soundslike, patext, papronunciation, rtc)
 {//Proposition or Amendment
 	this.ContestID = id;
 	this.ContestType = ctype;
 	this.NumberOfCandidatesToSelect = nocts;
 	this.ContestName = coname;
-	this.SoundsLike = soundslike;
 	this.NumberOfSelectedCandidates = 0;
 	this.ButtonIndex = -1;
 	this.PropositionOrAmendmentText = patext;
+	
+	if ((typeof(soundslike) == 'undefined') || (soundslike.trim().length == 0))
+		this.SoundsLike = coname;
+	else
+		this.SoundsLike = soundslike;
+	
+	if (typeof(papronunciation) == 'undefined')
+		this.PropositionOrAmendmentPronunciation = patext;
+	else
+		this.PropositionOrAmendmentPronunciation = papronunciation;
+		
+	if (ctype != "Contest")
+		this.RotateThisContest = false;
+	else if (typeof(rtc) == 'undefined')
+		this.RotateThisContest = false;
+	else
+		this.RotateThisContest = rtc;
 }
 
 

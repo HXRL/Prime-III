@@ -36,9 +36,16 @@ function getUrlVars()
 }
 
 if (typeof getUrlVars()["bc"] != "undefined") 
-	self.location = "index.html?bc=" + getUrlVars()["bc"];
+{
+	var urlparams = " " + window.top.location;
+	urlparams = urlparams.trim();
+	var urlparamsarray = urlparams.split("?");
+	self.location = "index.html?" + urlparamsarray[1];
+}
+else if (typeof getUrlVars()["rotation"] != "undefined") 
+	self.location = "index.html?rotation=" + getUrlVars()["rotation"];
 else
-	self.location = "index.html";
+	window.top.location = window.top.location;
 
 </script>
 </head>

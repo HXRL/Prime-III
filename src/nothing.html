@@ -24,8 +24,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 <script language="JavaScript">
 function setup()
 {
+	if (window.top.EnableScreenReading)
+		setTimeout("document.getElementById(\"myHeading\").focus()", 200);
+
 	self.document.bgColor = window.top.SelectionColor;
-	setTimeout("window.top.location=\"index.html\"", 5000);
+	setTimeout("window.top.location=window.top.location", 5000);
 }
 </script>
 </head>
@@ -34,7 +37,10 @@ function setup()
 <form id="myForm">
 
 <script language="JavaScript">
-document.write("<center><p id='headingParagraph'><font id='myHeading' size=\"12\">Your ballot has been cast.<br><br>Thank You.</font></p></center>");
+document.write("<center><p id='myHeading'");
+if (window.top.EnableScreenReading)
+	document.write(" tabindex=\"-1\"");
+document.write("><font id='myHeadingFont' size=\"12\">" + window.top.Phrase[window.top.SelectedVoice][53] + "<br><br>" + window.top.Phrase[window.top.SelectedVoice][54] + "</font></p></center>");
 </script>
 </form>
 </body>

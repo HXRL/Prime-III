@@ -21,6 +21,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 <html style="width: 100%; height: 100%;">
 <head>
+<link rel="stylesheet" type = "text/css" href="zoom.css">
+<script language="JavaScript" src="zoom.js"> </script>
+
 <script language="JavaScript">
 function buttonPressed(selection)
 {
@@ -44,19 +47,19 @@ function buttonPressed(selection)
 
 function processAccessCode()
 {
-	if (window.top.AllowVotersToSelectAudio)
+	if ((window.top.AllowVotersToSelectAudio) && (!window.top.EnableScreenReading))
 	{
 		window.top.MicIsOn = eval(self.document.forms[0].MicIsOn.value);
 		window.top.UseAudio = eval(self.document.forms[0].UseAudio.value);
 	}
 	
 	if (self.document.forms[0].AccessCodeText.value.length > 0)
-	{
+	{//mystring.replace(/,/g, "newchar");
 		window.top.processAccessCode(self.document.forms[0].AccessCodeText.value);
 	}
 	else
 	{
-		alert("You must enter an access code or scan a barcode to begin.");
+		alert(window.top.Phrase[window.top.SelectedVoice][47]);
 		clearAccessCode();
 	}
 }
@@ -66,9 +69,22 @@ function setFocus()
 	self.document.bgColor = window.top.SelectionColor;
 	self.document.forms[0].AccessCodeText.focus();
 
-	if (!window.top.AllowVotersToSelectAudio)
+	if ((!window.top.AllowVotersToSelectAudio) || (window.top.EnableScreenReading))
 		document.getElementById("MicHeading").style.visibility = "hidden";	
 	document.getElementById("AudioHeading").style.visibility = "hidden";
+	
+	if (window.top.EnableScreenReading)
+	{
+		var link = document.createElement('link')
+		link.setAttribute('rel', 'stylesheet')
+		link.setAttribute('type', 'text/css')
+		link.setAttribute('href', 'borders.css')
+		document.getElementsByTagName('head')[0].appendChild(link)
+	}
+	
+	self.document.forms[0].MicIsOn.value = window.top.MicIsOn;
+	MicChanged();
+	if (!window.top.MicIsOn) document.getElementById("MicParagraphHeading").style.visibility = "hidden";
 }
 
 function clearAccessCode()
@@ -87,89 +103,106 @@ function MicChanged()
 </script>
 </head>
 
-<body onLoad="setFocus()" style="width: 100%; height: 100%; margin:0px auto; overflow-y:hidden">
+<body onLoad="setFocus()" style="width: 100%; height: 100%; margin:0px auto; overflow-y:hidden" id="myDocument">
 <form id="myForm" onSubmit="processAccessCode();return false;">
 <center>
 <script language="JavaScript">
-document.write("<p id='headingParagraph'><font id='myHeading' size=\"14\">Enter access code or scan ballot to begin.</font></p>");
+document.write("<p id='headingParagraph'><font id='myHeading' size=\"14\">");
+
+if (window.top.UseTallyMode)
+	document.write(window.top.Phrase[window.top.SelectedVoice][141]);
+else
+	document.write(window.top.Phrase[window.top.SelectedVoice][2]);
+
+document.write("</font></p>");
 document.write("<table border=\"0\" cellspacing=\"3\" cellpadding=\"0\" bgcolor=\"");
 document.write(window.top.SelectionColor);
 document.write("\">\n");
 
-if (window.top.AllowVotersToSelectAudio)
+if ((window.top.AllowVotersToSelectAudio) && (!window.top.EnableScreenReading))
 {
-	document.write("<font id=\"MicHeading\" size=\"6\">\n");
-	document.write("Does the voter want to respond with the microphone?\n");
-	document.write("<input style=\"height:30px ; width:30px\" type=\"radio\" name=\"MicIsOn\" value=\"true\" onchange=\"MicChanged()\" checked> Yes\n");
-	document.write("<input style=\"height:30px ; width:30px\" type=\"radio\" name=\"MicIsOn\" value=\"false\" onchange=\"MicChanged()\"> No\n");
+	document.write("<p id=\"MicParagraphHeading\">\n<font id=\"MicHeading\" size=\"6\">\n");
+	document.write(window.top.Phrase[window.top.SelectedVoice][3] + "\n");
+	document.write("<input style=\"height:30px ; width:30px\" type=\"radio\" name=\"MicIsOn\" value=\"true\" onchange=\"MicChanged()\" checked>" +  window.top.Phrase[window.top.SelectedVoice][0] + "\n");
+	document.write("<input style=\"height:30px ; width:30px\" type=\"radio\" name=\"MicIsOn\" value=\"false\" onchange=\"MicChanged()\">" + window.top.Phrase[window.top.SelectedVoice][1] +"</p>\n");
 
 	document.write("<p id=\"AudioHeading\">\n");
-	document.write("Does the voter want the ballot read to them through the headphones?\n");
-	document.write("<input style=\"height:30px ; width:30px\" type=\"radio\" name=\"UseAudio\" value=\"true\" checked> Yes\n"); 
-	document.write("<input style=\"height:30px ; width:30px\" type=\"radio\" name=\"UseAudio\" value=\"false\"> No\n");
+	document.write(window.top.Phrase[window.top.SelectedVoice][5] + "\n");
+	document.write("<input style=\"height:30px ; width:30px\" type=\"radio\" name=\"UseAudio\" value=\"true\" checked>" +  window.top.Phrase[window.top.SelectedVoice][0] + "\n"); 
+	document.write("<input style=\"height:30px ; width:30px\" type=\"radio\" name=\"UseAudio\" value=\"false\">" + window.top.Phrase[window.top.SelectedVoice][1] +"\n");
 	document.write("</p></font>\n");
 }
 document.write("<tr><td>\n");
 
-document.write("<table>");
-var buttonFont = "bold 36px Arial;width:500;height:200";
-i=1;
-while (i<10)
+var buttonFont = window.top.AccessButtonFont;
+if (!window.top.UseTallyMode)
 {
-	document.write("<tr>");
-		
-	for (j=0;j<3;j++)
+	document.write("<table align=\"center\">");
+	i=1;
+	while (i<10)
 	{
-		document.write("<td valign=\"top\" align=\"center\" bgcolor=\"");
-		document.write(window.top.SelectionColor);
-		document.write("\">\n");
-		document.write("<button style=\"font: ");
-		document.write(buttonFont);
-		document.write("\" type=\"button\" id=\"accessButton");
-		document.write(i);
-		document.write("\" onClick=\"buttonPressed('");
-		document.write(i);
-		document.write("')\">");
-		document.write(i);
-		document.write("</button></td>");
-		i++;
-	}
+		document.write("<tr>");
+		
+		for (j=0;j<3;j++)
+		{
+			document.write("<td valign=\"top\" align=\"center\" bgcolor=\"");
+			document.write(window.top.SelectionColor);
+			document.write("\">\n");
+			document.write("<button style=\"font: ");
+			document.write(buttonFont);
+			document.write("\" type=\"button\" id=\"accessButton");
+			document.write(i);
+			document.write("\" onClick=\"buttonPressed('");
+			document.write(i);
+			document.write("')\">");
+			document.write(i);
+			document.write("</button></td>");
+			i++;
+		}
 	
-	document.write("</tr>");
+		document.write("</tr>");
+	}
 }
-
 
 document.write("<tr>");
 
-x="Backspace";
 document.write("<td valign=\"top\" align=\"center\" bgcolor=\"");
 document.write(window.top.SelectionColor);
 document.write("\">\n");
-document.write("<button style=\"font: ");
-document.write(buttonFont);
-document.write("\" type=\"button\" id=\"accessButton");
-document.write(x);
-document.write("\" onClick=\"buttonPressed('");
-document.write(x);
-document.write("')\">");
-document.write(x);
-document.write("</button></td>");
 
-x="0";
-document.write("<td valign=\"top\" align=\"center\" bgcolor=\"");
-document.write(window.top.SelectionColor);
-document.write("\">\n");
-document.write("<button style=\"font: ");
-document.write(buttonFont);
-document.write("\" type=\"button\" id=\"accessButton");
-document.write(x);
-document.write("\" onClick=\"buttonPressed('");
-document.write(x);
-document.write("')\">");
-document.write(x);
-document.write("</button></td>");
+if (!window.top.UseTallyMode)
+{
+	x=window.top.Phrase[window.top.SelectedVoice][6]; //Backspace
+	document.write("<button style=\"font: ");
+	document.write(buttonFont);
+	document.write("\" type=\"button\" id=\"accessButton");
+	document.write(x);
+	document.write("\" onClick=\"buttonPressed('Backspace')\">");
+	document.write(x);
+	document.write("</button>");
+}
+document.write("</td>");
 
-x="Enter";
+document.write("<td valign=\"top\" align=\"center\" bgcolor=\"");
+document.write(window.top.SelectionColor);
+document.write("\">\n");
+
+if (!window.top.UseTallyMode)
+{
+	x="0";
+	document.write("<button style=\"font: ");
+	document.write(buttonFont);
+	document.write("\" type=\"button\" id=\"accessButton");
+	document.write(x);
+	document.write("\" onClick=\"buttonPressed('");
+	document.write(x);
+	document.write("')\">");
+	document.write(x);
+	document.write("</button>");
+}
+document.write("</td>");
+
+x=window.top.Phrase[window.top.SelectedVoice][7]; //Enter
 document.write("<td valign=\"top\" align=\"center\" bgcolor=\"");
 document.write(window.top.SelectionColor);
 document.write("\">\n");
@@ -177,13 +210,12 @@ document.write("<button style=\"font: ");
 document.write(buttonFont);
 document.write("\" type=\"button\" id=\"accessButton");
 document.write(x);
-document.write("\" onClick=\"buttonPressed('");
-document.write(x);
-document.write("')\">");
+document.write("\" onClick=\"buttonPressed('Enter')\">");
 document.write(x);
 document.write("</button></td>");
 
 document.write("</tr></table>");
+
 </script>
 </td></tr>
 
@@ -194,10 +226,27 @@ document.write("<input ");
 if (window.top.AccessCodeBoxIsReadOnly)
 	document.write("readonly ");
 
-document.write("style=\"font: bold 18px Arial;width:1506;height:50\" type=\"password\" maxlength=\"9000\" size=\"100\" name=\"AccessCodeText\" />");
+document.write("style=\"" + window.top.AccessCodeBoxFont + "\" type=\"password\" maxlength=\"9000\" size=\"100\" name=\"AccessCodeText\" />");
 </script>
 </table>
 </center>
 </form>
+
+
+<div id = 'zoomButtons'>
+</br>
+<input type="image" id="outZoom" src="ZoomOut.png" onclick="zoomOut()" > </br> </br>
+<input type="image" id="inZoom" src="ZoomIn.png" onclick="zoomIn()" >
+</br>
+</div>
+
+<script language="JavaScript">
+	if (!window.top.UseZoom)
+	{
+		var div = document.getElementById( "zoomButtons" );
+		div.style.display = "none";
+	}
+</script>
+
 </body>
 </html>

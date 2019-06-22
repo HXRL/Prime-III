@@ -21,20 +21,75 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 <html style="width: 100%; height: 100%;">
 <head>
+<link rel="stylesheet" type = "text/css" href="zoom.css">
+<script language="JavaScript" src="zoom.js"> </script>
+
 <script language="JavaScript">
 function setup()
 {
 	self.document.bgColor = window.top.SelectionColor;
+	
+	if ((window.top.EnableScreenReading) && (!window.top.VotingStarted))
+		window.top.setup();
+	else if (window.top.EnableScreenReading)
+	{
+		setTimeout("document.getElementById(\"myHeading\").focus()", 200);
+		window.top.document.title = window.top.Phrase[window.top.SelectedVoice][48] + " | " + window.top.BallotName;
+		
+		var link = document.createElement('link')
+		link.setAttribute('rel', 'stylesheet')
+		link.setAttribute('type', 'text/css')
+		link.setAttribute('href', 'borders.css')
+		document.getElementsByTagName('head')[0].appendChild(link)
+	}
 }
 </script>
 </head>
 
-<body style="width: 100%; height: 100%; margin:0px auto; overflow-y:hidden" onLoad="JavaScript:setup();">
+<body id="myDocument" style="width: 100%; height: 100%; margin:0px auto; overflow-y:hidden" onLoad="JavaScript:setup();">
 <form id="myForm">
 
 <script language="JavaScript">
-document.write("<center><p id='headingParagraph'><font id='myHeading' size=\"12\">Your ballot is printing.</font></p></center>");
+
+if ((window.top.EnableScreenReading) && (!window.top.VotingStarted))
+	document.write("<center><h1 id='headingParagraph'><font id='myHeading' size=\"12\"> </font></h1>");
+else if (window.top.EnableScreenReading)
+{
+	document.write("<center><h1 id='myHeading'");
+	if (window.top.EnableScreenReading)
+		document.write(" tabindex=\"-1\"");
+	document.write("><font id='myHeadingFont' size=\"12\">" + window.top.Phrase[window.top.SelectedVoice][136] + "</font></h1>");
+
+	document.write("<button style=\"font: bold 18px Arial;width:290;height:90\" type=\"button\" id=\"PrintBallot\" onClick=\"window.top.ballotFrame.printBallot()\">" + window.top.Phrase[window.top.SelectedVoice][48] + "</button>");
+	
+	document.write("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+	
+	document.write("<button style=\"font: bold 18px Arial;width:290;height:90\" type=\"button\" id=\"Done\" onClick=\"window.top.location=window.top.location\">" + window.top.Phrase[window.top.SelectedVoice][50] + "</button>");
+}
+else
+	document.write("<center><h1 id='headingParagraph'><font id='myHeading' size=\"12\">" + window.top.Phrase[window.top.SelectedVoice][46] + "</font></h1>");
+
+
+document.write("</center>");
+
+
 </script>
 </form>
+
+<div id = 'zoomButtons'>
+</br>
+<input type="image" id="outZoom" src="ZoomOut.png" onclick="zoomOut()" > </br> </br>
+<input type="image" id="inZoom" src="ZoomIn.png" onclick="zoomIn()" >
+
+<script language="JavaScript">
+	if (!window.top.UseZoom)
+	{
+		var div = document.getElementById( "zoomButtons" );
+		div.style.display = "none";
+	}
+</script>
+
+</br>
+</div>
 </body>
 </html>

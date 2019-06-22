@@ -22,24 +22,25 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 <html style="width: 100%; height: 100%;">
 <head>
 <script language="JavaScript" src="Phrases.js"> </script>
-<script language="JavaScript" src="Settings.js"> </script>
-
 <script language="JavaScript">
 function setup()
 {
 	if (window.top.EnableScreenReading)
-		setTimeout("document.getElementById(\"myHeading\").focus()", 200);
+		setTimeout("document.getElementById(\"myHeading\").focus()", 900);
 	self.document.bgColor = window.top.SelectionColor;
 }
 </script>
 </head>
 
-<body style="width: 100%; height: 100%; margin:0px auto; overflow-y:hidden" onLoad="setup()">
+<body style="width: 100%; height: 100%; margin:0px auto; overflow-y:hidden">
+<form id="myForm">
+
 <script language="JavaScript">
 document.write("<center><p id='myHeading'");
 if (window.top.EnableScreenReading)
 	document.write(" tabindex=\"-1\"");
-document.write("><font id='myHeadingFont' size=\"12\">" + Phrase[SelectedVoice][52] + "</font></p></center>");
+document.write("><font id='myHeadingFont' size=\"12\">" + Phrase[SelectedVoice][119] + "</font></p></center>");
 </script>
+</form>
 </body>
 </html>
